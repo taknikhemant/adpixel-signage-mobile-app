@@ -47,7 +47,7 @@ class MedicalTemp2 extends StatelessWidget {
                                       .textColor!
                                       .toColor()
                                   : Colors.black,
-                              fontSize: 50.sp,
+                              fontSize: 52.sp,
                               fontFamily: 'Roboto Condensed',
                               fontWeight: FontWeight.bold),
                         ),
@@ -87,7 +87,7 @@ class MedicalTemp2 extends StatelessWidget {
                                       .textColor!
                                       .toColor()
                                   : Colors.black,
-                              fontSize: 40.sp,
+                              fontSize: 42.sp,
                               fontFamily: 'Roboto Condensed',
                               fontWeight: FontWeight.w600,
                             ),
@@ -115,7 +115,7 @@ class MedicalTemp2 extends StatelessWidget {
                                                   .deviceAppearance!.textColor!
                                                   .toColor()
                                               : Colors.black,
-                                          fontSize: 32.sp,
+                                          fontSize: 34.sp,
                                           fontFamily: 'Roboto Condensed',
                                           fontWeight: FontWeight.w400,
                                         ),
@@ -143,7 +143,7 @@ class MedicalTemp2 extends StatelessWidget {
                                           .deviceAppearance!.textColor!
                                           .toColor()
                                       : Colors.black,
-                                  fontSize: 35.sp,
+                                  fontSize: 37.sp,
                                   fontFamily: 'Roboto Condensed',
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -176,7 +176,7 @@ class MedicalTemp2 extends StatelessWidget {
                                               .deviceAppearance!.textColor!
                                               .toColor()
                                           : Colors.black,
-                                      fontSize: 30.sp,
+                                      fontSize: 32.sp,
                                       fontFamily: 'Roboto Condensed',
                                       fontWeight: FontWeight.w400,
                                     ),
@@ -228,7 +228,7 @@ class MedicalTemp2 extends StatelessWidget {
                                               .deviceAppearance!.textColor!
                                               .toColor()
                                           : Colors.black,
-                                      fontSize: 30.sp,
+                                      fontSize: 32.sp,
                                       fontFamily: 'Roboto Condensed',
                                       fontWeight: FontWeight.w400,
                                     ),
