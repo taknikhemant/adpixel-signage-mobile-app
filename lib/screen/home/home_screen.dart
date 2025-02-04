@@ -8,6 +8,7 @@ import 'templates/medical_temp2.dart';
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
   final homeController = Get.put(HomeController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +22,7 @@ class HomeScreen extends StatelessWidget {
                     child: snap.data!.data!.device!.templateId ==
                             "ed1f51de-2d13-4bf7-bb9d-3c42ef93f0f0"
                         ? MedicalTemp2(
-                            tempData: snap.data,
+                            tempData: homeController.templateData,
                           )
                         : const NoTempleteFound());
           }),

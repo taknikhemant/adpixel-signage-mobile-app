@@ -33,9 +33,9 @@ class _CheckInternetConnectionState extends State<CheckInternetConnection> {
         case InternetStatus.disconnected:
           baseController.internetConectionStatus.value = false;
           break;
-        default:
-          baseController.internetConectionStatus.value = null;
-          break;
+        // default:
+        //   baseController.internetConectionStatus.value = null;
+        //   break;
       }
     });
     super.initState();

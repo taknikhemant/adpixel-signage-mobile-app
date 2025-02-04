@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -92,6 +94,8 @@ class _MediaWidgetState extends State<MediaWidget> {
   @override
   void initState() {
     super.initState();
+    log("message=>${widget.mediaItem.fileType!.toLowerCase()}",
+        name: "file data");
     if (widget.mediaItem.fileType!.toLowerCase() == 'video') {
       _videoController =
           VideoPlayerController.networkUrl(Uri.parse(widget.mediaItem.file!))
@@ -138,7 +142,8 @@ class _MediaWidgetState extends State<MediaWidget> {
             : const Center(child: CircularProgressIndicator());
 
       default:
-        return const Center(child: Text('Unsupported media type'));
+        return Center(
+            child: Text('Unsupported media type ${widget.mediaItem.fileType}'));
     }
   }
 }
