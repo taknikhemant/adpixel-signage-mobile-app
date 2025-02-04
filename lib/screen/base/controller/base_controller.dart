@@ -5,6 +5,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class BaseController extends GetxController {
   // final drawerSelectedIndex = 0.obs;
+  // internetConnection
+  final internetConectionStatus = RxnBool();
+
+  onInitFunctionCall() async {}
 
   Future<bool?> checkUserLogin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
