@@ -8,8 +8,6 @@ class BaseController extends GetxController {
   // internetConnection
   final internetConectionStatus = RxnBool();
 
-  onInitFunctionCall() async {}
-
   Future<bool?> checkUserLogin() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     log("message==>${prefs.getString('jwt')}", name: "UserToken");

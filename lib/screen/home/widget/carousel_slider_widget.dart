@@ -3,18 +3,17 @@ import 'dart:developer';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
-
+import '../controller/home_controller.dart';
 import '../models/device_templete_data_model.dart';
 
 class CarouselSliderWidget extends StatefulWidget {
   final int? expandeFlex;
   final List<Carousal>? mediaItems;
-  final CarouselSliderController? carouselController;
 
   const CarouselSliderWidget({
     this.expandeFlex = 4,
-    this.carouselController,
     required this.mediaItems,
     super.key,
   });
@@ -24,18 +23,18 @@ class CarouselSliderWidget extends StatefulWidget {
 }
 
 class _CarouselSliderWidgetState extends State<CarouselSliderWidget> {
-  bool _isVideoPlaying = false;
-
+  final homeController = Get.find<HomeController>();
+  CarouselSliderController? carouselController = CarouselSliderController();
   void _onVideoStart() {
-    setState(() {
-      _isVideoPlaying = true;
-    });
+    homeController.isTemplateVideoPlaying.value = true;
   }
 
   void _onVideoEnd() {
-    setState(() {
-      _isVideoPlaying = false;
-    });
+    homeController.isTemplateVideoPlaying.value = false;
+    // Move to next slide when video completes
+    if (carouselController != null) {
+      carouselController!.nextPage();
+    }
   }
 
   @override
@@ -49,25 +48,31 @@ class _CarouselSliderWidgetState extends State<CarouselSliderWidget> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 50.sp),
               ),
             )
-          : CarouselSlider.builder(
-              carouselController: widget.carouselController,
-              itemCount: widget.mediaItems!.length,
-              itemBuilder: (context, index, realIndex) {
-                final mediaItem = widget.mediaItems![index];
-                return MediaWidget(
-                  mediaItem: mediaItem,
-                  onVideoStart: _onVideoStart,
-                  onVideoEnd: _onVideoEnd,
-                );
-              },
-              options: CarouselOptions(
-                enableInfiniteScroll: true,
-                autoPlay: !_isVideoPlaying && (widget.mediaItems!.length > 1),
-                viewportFraction: 1,
-                disableCenter: true,
-                autoPlayInterval: const Duration(seconds: 10),
-              ),
-            ),
+          : Obx(() {
+              return CarouselSlider.builder(
+                carouselController: carouselController,
+                itemCount: widget.mediaItems!.length,
+                itemBuilder: (context, index, realIndex) {
+                  final mediaItem = widget.mediaItems![index];
+                  return MediaWidget(
+                    mediaItem: mediaItem,
+                    onVideoStart: _onVideoStart,
+                    onVideoEnd: _onVideoEnd,
+                  );
+                },
+                options: CarouselOptions(
+                  enableInfiniteScroll: true,
+                  autoPlay: !homeController.isTemplateVideoPlaying.value &&
+                      (widget.mediaItems!.length > 1),
+                  viewportFraction: 1,
+                  disableCenter: true,
+                  autoPlayInterval: Duration(
+                      seconds: !homeController.isTemplateVideoPlaying.value
+                          ? 10
+                          : 0),
+                ),
+              );
+            }),
     );
   }
 }
@@ -106,18 +111,23 @@ class _MediaWidgetState extends State<MediaWidget> {
               widget.onVideoStart();
 
               // Listen for video completion
-              _videoController?.addListener(() {
-                if (_videoController!.value.position >=
-                    _videoController!.value.duration) {
-                  widget.onVideoEnd();
-                }
-              });
+              _videoController?.addListener(_checkVideoCompletion);
             });
+    }
+  }
+
+  void _checkVideoCompletion() {
+    if (_videoController != null &&
+        _videoController!.value.isInitialized &&
+        _videoController!.value.position >= _videoController!.value.duration) {
+      widget.onVideoEnd();
+      _videoController?.removeListener(_checkVideoCompletion);
     }
   }
 
   @override
   void dispose() {
+    _videoController?.removeListener(_checkVideoCompletion);
     _videoController?.dispose();
     super.dispose();
   }

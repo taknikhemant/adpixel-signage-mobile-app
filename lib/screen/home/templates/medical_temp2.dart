@@ -103,7 +103,7 @@ class MedicalTemp2 extends StatelessWidget {
                                 children: [
                                   ...tempData!.value!.data!.informations!
                                       .docOtherSpecialization!
-                                      .split(",")
+                                      .split(";")
                                       .map(
                                         (e) => Text(
                                           '-> ${e.trim()}',
@@ -173,9 +173,25 @@ class MedicalTemp2 extends StatelessWidget {
                                       width: 15.w,
                                     ),
                                     Text(
-                                      tempData!.value!.data!.informations!
-                                          .docOpdDays!
-                                          .trim(),
+                                      (() {
+                                        if (tempData?.value!.data?.informations
+                                                ?.docOpdDays !=
+                                            null) {
+                                          var opdDays = tempData!.value!.data!
+                                              .informations!.docOpdDays!
+                                              .split(";")
+                                              .map((e) => e.trim())
+                                              .toList();
+                                          return opdDays
+                                              .map((time) => time)
+                                              .join('\n');
+                                        } else {
+                                          return '';
+                                        }
+                                      })(),
+                                      // tempData!.value!.data!.informations!
+                                      //     .docOpdDays!
+                                      //     .trim(),
                                       style: TextStyle(
                                         color: tempData!.value!.data!.device!
                                                     .deviceAppearance !=
@@ -218,7 +234,7 @@ class MedicalTemp2 extends StatelessWidget {
                                             null) {
                                           var opdTimes = tempData!.value!.data!
                                               .informations!.docOpdTime!
-                                              .split(",")
+                                              .split(";")
                                               .map((e) => e.trim())
                                               .toList();
                                           return opdTimes

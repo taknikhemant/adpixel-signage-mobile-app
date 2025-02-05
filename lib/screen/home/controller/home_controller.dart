@@ -9,6 +9,7 @@ class HomeController extends GetxController {
   final socketService = Get.put(SocketService());
   final whatsappNumber = Rxn<String>();
   final templateData = Rxn<DeviceTempleteDataModel>();
+  final isTemplateVideoPlaying = false.obs;
 
   @override
   void onInit() async {

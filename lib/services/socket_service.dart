@@ -12,6 +12,7 @@ class SocketService extends GetxService {
   late IO.Socket socket;
   RxString message = ''.obs;
   RxString type = ''.obs;
+  RxBool isSocketConnected = false.obs;
   RxList<Map<String, dynamic>> data = <Map<String, dynamic>>[].obs;
 
   // final String deviceId = "7fa24bd5-3060-42bc-9555-a147a2ea0da5"; // Replace with actual device ID
@@ -38,7 +39,7 @@ class SocketService extends GetxService {
 
     socket.onConnect((_) {
       log('Connected to Socket.IO Server', name: "server onConnect");
-
+      isSocketConnected.value = true;
       // Send the initial message after connecting
       String socketId = socket.id ?? "";
       sendMessage("broadcastMessage", {
@@ -58,8 +59,10 @@ class SocketService extends GetxService {
       Get.offAll(() => LoginScreen());
     });
 
-    socket.onDisconnect(
-        (_) => log('Socket Disconnected', name: "server disconnect"));
+    socket.onDisconnect((_) {
+      isSocketConnected.value = false;
+      log('Socket Disconnected', name: "server disconnect");
+    });
   }
 
   void _handleResponse(dynamic response, Rxn<DeviceTempleteDataModel>? d) {
