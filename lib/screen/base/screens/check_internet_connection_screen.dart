@@ -28,7 +28,6 @@ class _CheckInternetConnectionState extends State<CheckInternetConnection> {
       switch (status) {
         case InternetStatus.connected:
           baseController.internetConectionStatus.value = true;
-          await baseController.onInitFunctionCall();
           break;
         case InternetStatus.disconnected:
           baseController.internetConectionStatus.value = false;
