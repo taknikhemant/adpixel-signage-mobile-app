@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../screen/home/models/device_templete_data_model.dart';
 import '../screen/login/models/login_model.dart';
+import '../screen/login/screens/login_screen.dart';
 import '../utils/constants/api_routes.dart';
 
 class ApiServices {
@@ -74,6 +76,7 @@ class ApiServices {
       return model;
     } else if (response.statusCode == 401 || response.statusCode == 422) {
       await prefs.clear();
+      Get.offAll(() => LoginScreen());
       return null;
     } else {
       return model;

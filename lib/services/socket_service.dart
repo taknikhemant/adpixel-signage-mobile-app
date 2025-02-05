@@ -5,6 +5,8 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:get/get.dart';
 
 import '../screen/home/models/device_templete_data_model.dart';
+import '../screen/login/screens/login_screen.dart';
+import '../utils/constants/api_routes.dart';
 
 class SocketService extends GetxService {
   late IO.Socket socket;
@@ -25,10 +27,11 @@ class SocketService extends GetxService {
     final jwttoken = prefs.getString('jwt');
     final deviceId = prefs.getString('deviceId');
     socket = IO.io(
-      'wss://signage-socket.adpixel.tech',
+      ApiRoutes.socketURL,
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .setAuth({"token": jwttoken})
+          .setReconnectionDelay(2000)
           .enableAutoConnect()
           .build(),
     );
@@ -49,6 +52,12 @@ class SocketService extends GetxService {
       _handleResponse(response, d);
     });
 
+    socket.on('auth_error', (response) async {
+      log('Connected to Socket.IO Server auth_error', name: "server on");
+      await prefs.clear();
+      Get.offAll(() => LoginScreen());
+    });
+
     socket.onDisconnect(
         (_) => log('Socket Disconnected', name: "server disconnect"));
   }
@@ -64,14 +73,6 @@ class SocketService extends GetxService {
       data.value = dataList
           .map((item) => {'key': item['key'], 'value': item['value']})
           .toList();
-      // jsonResponse['type'] == "opd_status"
-      //     ? d!.value!.data!.device!.opdStatus = dataList[0]["value"]
-      //     : jsonResponse['type'] == "template_update"
-      //         ? d!.value!.data!.device!.templateId = dataList[0]["value"]
-      //         : jsonResponse['type'] == "carousal_update"
-      //             ? d!.value!.data!.carousal =
-      //                 stringTocaraousalList(dataList[0]["value"])
-      //             : null;
 
       switch (jsonResponse['type']) {
         case "opd_status":
