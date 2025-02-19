@@ -1,10 +1,12 @@
 import 'dart:developer';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
+import '../../../services/custom_cache_manager.dart';
 import '../controller/home_controller.dart';
 import '../models/device_templete_data_model.dart';
 
@@ -62,14 +64,13 @@ class _CarouselSliderWidgetState extends State<CarouselSliderWidget> {
                 },
                 options: CarouselOptions(
                   enableInfiniteScroll: true,
-                  autoPlay: !homeController.isTemplateVideoPlaying.value &&
-                      (widget.mediaItems!.length > 1),
+                  autoPlay:
+                      !homeController.isTemplateVideoPlaying.value && true,
+                  // autoPlay: !homeController.isTemplateVideoPlaying.value &&
+                  //     (widget.mediaItems!.length > 1),
                   viewportFraction: 1,
                   disableCenter: true,
-                  autoPlayInterval: Duration(
-                      seconds: !homeController.isTemplateVideoPlaying.value
-                          ? 10
-                          : 0),
+                  autoPlayInterval: const Duration(seconds: 10),
                 ),
               );
             }),
@@ -101,18 +102,26 @@ class _MediaWidgetState extends State<MediaWidget> {
     super.initState();
     log("message=>${widget.mediaItem.fileType!.toLowerCase()}",
         name: "file data");
-    if (widget.mediaItem.fileType!.toLowerCase() == 'video') {
-      _videoController =
-          VideoPlayerController.networkUrl(Uri.parse(widget.mediaItem.file!))
-            ..initialize().then((_) {
-              setState(() {});
-              _videoController?.setLooping(false); // Disable looping
-              _videoController?.play();
-              widget.onVideoStart();
+    _loadMedia();
+  }
 
-              // Listen for video completion
-              _videoController?.addListener(_checkVideoCompletion);
-            });
+  void _loadMedia() async {
+    String fileType = widget.mediaItem.fileType!.toLowerCase();
+    String fileUrl = widget.mediaItem.file!;
+
+    if (fileType == 'video') {
+      // Download and cache the video
+      final file = await CustomCacheManager().getSingleFile(fileUrl);
+      _videoController = VideoPlayerController.file(file)
+        ..initialize().then((_) {
+          setState(() {});
+          _videoController?.setLooping(false);
+          _videoController?.play();
+          widget.onVideoStart();
+
+          // Listen for video completion
+          _videoController?.addListener(_checkVideoCompletion);
+        });
     }
   }
 
@@ -137,10 +146,13 @@ class _MediaWidgetState extends State<MediaWidget> {
     switch (widget.mediaItem.fileType!.toLowerCase()) {
       case 'image':
       case 'gif':
-        return Image.network(
-          widget.mediaItem.file!,
+        return CachedNetworkImage(
+          imageUrl: widget.mediaItem.file!,
           fit: BoxFit.fill,
           width: double.infinity,
+          placeholder: (context, url) =>
+              const Center(child: CircularProgressIndicator()),
+          errorWidget: (context, url, error) => Icon(Icons.error, size: 50.r),
         );
 
       case 'video':

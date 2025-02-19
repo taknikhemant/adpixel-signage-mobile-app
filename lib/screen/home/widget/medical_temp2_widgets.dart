@@ -17,7 +17,7 @@ Widget patientQueue() {
           children: [
             SvgPicture.asset(
               "assets/svg/patients.svg",
-              height: 35.r,
+              height: 37.r,
             ),
             SizedBox(
               width: 6.w,
@@ -26,7 +26,7 @@ Widget patientQueue() {
               'PATIENT QUEUE',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 35.sp,
+                fontSize: 37.sp,
                 fontFamily: 'Roboto Condensed',
                 fontWeight: FontWeight.w500,
               ),
@@ -36,7 +36,7 @@ Widget patientQueue() {
             ),
             SvgPicture.asset(
               "assets/svg/patients.svg",
-              height: 35.r,
+              height: 37.r,
             ),
           ],
         ),
@@ -53,7 +53,7 @@ Widget patientQueue() {
                       '<-- LAST PATIENT CALL',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20.sp,
+                        fontSize: 22.sp,
                         fontFamily: 'Roboto Condensed',
                         fontWeight: FontWeight.w500,
                       ),
@@ -74,7 +74,7 @@ Widget patientQueue() {
                               '16',
                               style: TextStyle(
                                 color: const Color(0xFF1C1D1E),
-                                fontSize: 30.sp,
+                                fontSize: 32.sp,
                                 fontFamily: 'Roboto Condensed',
                                 fontWeight: FontWeight.w500,
                               ),
@@ -88,7 +88,7 @@ Widget patientQueue() {
                           'Patient Full Name',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 28.sp,
+                            fontSize: 30.sp,
                             fontFamily: 'Roboto Condensed',
                             fontWeight: FontWeight.w500,
                           ),
@@ -110,7 +110,7 @@ Widget patientQueue() {
                       'NEXT PATIENT -->',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20.sp,
+                        fontSize: 22.sp,
                         fontFamily: 'Roboto Condensed',
                         fontWeight: FontWeight.w500,
                       ),
@@ -131,7 +131,7 @@ Widget patientQueue() {
                               '16',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 30.sp,
+                                fontSize: 32.sp,
                                 fontFamily: 'Roboto Condensed',
                                 fontWeight: FontWeight.w500,
                               ),
@@ -145,7 +145,7 @@ Widget patientQueue() {
                           'Patient Full Name',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 28.sp,
+                            fontSize: 30.sp,
                             fontFamily: 'Roboto Condensed',
                             fontWeight: FontWeight.w500,
                           ),

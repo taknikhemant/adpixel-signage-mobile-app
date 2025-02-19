@@ -1,0 +1,2 @@
+/Users/sohitvyas/projects/flutter/freelance/taknikbharti/signage_pixel/android/app/.cxx/Debug/h1t2o4k2/armeabi-v7a/CMakeFiles/edit_cache.dir
+/Users/sohitvyas/projects/flutter/freelance/taknikbharti/signage_pixel/android/app/.cxx/Debug/h1t2o4k2/armeabi-v7a/CMakeFiles/rebuild_cache.dir

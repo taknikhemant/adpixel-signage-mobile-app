@@ -49,7 +49,7 @@ class SocketService extends GetxService {
     });
 
     socket.on('device_update', (response) {
-      log('Connected to Socket.IO Server', name: "server on");
+      log('Connected to Socket.IO Server ${response}', name: "server on");
       _handleResponse(response, d);
     });
 
@@ -89,9 +89,18 @@ class SocketService extends GetxService {
           break;
 
         case "carousal_update":
-          d!.value!.data!.carousal = [];
-          d.value!.data!.carousal = stringTocaraousalList(dataList[0]["value"]);
-          d.refresh();
+          var carousalValue = dataList[0]["value"];
+
+          if (carousalValue is List && carousalValue.isEmpty) {
+            d!.value!.data!.carousal = [];
+          } else if (carousalValue is String) {
+            d!.value!.data!.carousal = stringTocaraousalList(carousalValue);
+          } else {
+            log('Unexpected data type for carousal_update: ${carousalValue.runtimeType}',
+                name: "_handleResponse catch");
+          }
+
+          d!.refresh();
           break;
 
         default:

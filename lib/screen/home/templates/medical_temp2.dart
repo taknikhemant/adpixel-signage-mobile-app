@@ -189,9 +189,6 @@ class MedicalTemp2 extends StatelessWidget {
                                           return '';
                                         }
                                       })(),
-                                      // tempData!.value!.data!.informations!
-                                      //     .docOpdDays!
-                                      //     .trim(),
                                       style: TextStyle(
                                         color: tempData!.value!.data!.device!
                                                     .deviceAppearance !=
