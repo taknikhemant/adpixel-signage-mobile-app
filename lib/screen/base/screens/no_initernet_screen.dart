@@ -19,12 +19,12 @@ class NoIniternetScreen extends StatelessWidget {
               height: 300.r,
             ),
             Text(
-              "No internet connection. Please connect to the internet.",
+              "No internet connection or server unreachable. Please check your connection and retry. If the issue continues, please contact support or maintenance.",
               textAlign: TextAlign.center,
               style: TextStyle(
                   color: Colors.black,
-                  fontWeight: FontWeight.w500,
-                  fontSize: 60.sp),
+                  fontWeight: FontWeight.w700,
+                  fontSize: 50.sp),
             )
           ],
         ),

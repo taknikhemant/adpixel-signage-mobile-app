@@ -23,6 +23,11 @@ class HomeController extends GetxController {
     return data;
   }
 
+  Future logOut() async {
+    var data = await ApiServices.instance.logOut();
+    return data;
+  }
+
   Future<String?> getUserNumer() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getString('userNumber');

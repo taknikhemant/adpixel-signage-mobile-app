@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../services/api_services.dart';
 import '../../home/home_screen.dart';
@@ -8,6 +11,13 @@ import '../../home/home_screen.dart';
 class LoginController extends GetxController {
   // Controllers to retrieve entered values
   final TextEditingController pinController = TextEditingController();
+  final currentAppVersion = "".obs;
+
+  @override
+  void onInit() async {
+    super.onInit();
+    await getAppVersion();
+  }
 
   @override
   void onClose() {
@@ -81,7 +91,7 @@ class LoginController extends GetxController {
       gravity: ToastGravity.BOTTOM,
       timeInSecForIosWeb: 2,
       backgroundColor: isSuccess ? null : Colors.red,
-      textColor: Colors.white,
+      textColor: Colors.black,
       fontSize: 16.0,
     );
   }
@@ -112,5 +122,12 @@ class LoginController extends GetxController {
       textColor: Colors.white,
       fontSize: 16.0,
     );
+  }
+
+  getAppVersion() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    String version = packageInfo.version;
+    currentAppVersion.value = version;
+    log("message ==> ${version}", name: "App Package");
   }
 }

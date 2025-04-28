@@ -46,17 +46,27 @@ class LoginScreen extends StatelessWidget {
                   await loginController.submitLoginForm(loginFormKey);
                 },
                 style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0.r),
-                    ),
-                    backgroundColor: const Color(0xff1E1E1E),
-                    minimumSize: Size(Get.width, 100.h)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0.r),
+                  ),
+                  backgroundColor: const Color(0xff1E1E1E),
+                  minimumSize: Size(Get.width, 100.h),
+                ),
                 child: Text(
                   'Login',
                   style: TextStyle(color: Colors.white, fontSize: 60.sp),
                 ),
               ),
               const Spacer(),
+              Obx(() {
+                return Text(
+                  "version : ${loginController.currentAppVersion.value}",
+                  style: TextStyle(fontSize: 40.sp),
+                );
+              }),
+              SizedBox(
+                height: 15.h,
+              ),
               Text.rich(
                 style: TextStyle(fontSize: 40.sp),
                 TextSpan(

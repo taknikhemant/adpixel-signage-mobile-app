@@ -340,3 +340,52 @@ Widget opdOffLine() {
     ),
   );
 }
+
+Widget opdONLine() {
+  return Container(
+    color: const Color(0xFF00A254),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: 110.w,
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 30.h, right: 20.w),
+          child: Image.asset(
+            "assets/svg/doctor_stethoscope.png",
+            width: 100.r,
+            color: Colors.white,
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'OPD On-line',
+              style: TextStyle(
+                height: 1,
+                color: Colors.white,
+                fontSize: 62.sp,
+                fontFamily: 'Roboto Condensed',
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            // Text(
+            //   'Will start tomorrow',
+            //   style: TextStyle(
+            //     color: Colors.white,
+            //     fontSize: 35.sp,
+            //     fontFamily: 'Roboto Condensed',
+            //     fontWeight: FontWeight.w500,
+            //   ),
+            // ),
+          ],
+        ),
+      ],
+    ),
+  );
+}

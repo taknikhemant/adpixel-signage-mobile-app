@@ -46,6 +46,33 @@ class ApiServices {
     }
   }
 
+  Future logOut() async {
+    String url = ApiRoutes.baseURL + ApiRoutes.logout;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final jwttoken = prefs.getString('jwt');
+    final response = await client.post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer ${jwttoken ?? ""}',
+      },
+    );
+
+    log(url, name: "ApiServices--> logOut");
+    log(response.statusCode.toString(), name: "ApiServices--> logOut");
+    log(response.body.toString(), name: "ApiServices--> logOut");
+
+    if (response.statusCode == 200) {
+      await prefs.clear();
+      Get.offAll(() => LoginScreen());
+      // await prefs.setString('fcmToken', model.data!.user!.deviceToken!);
+      // log("${prefs.getString("jwt")}", name: "ApiServices--> login_JWT");
+      return response.body;
+    } else {
+      return response.body;
+    }
+  }
+
   Future<DeviceTempleteDataModel?> deviceTempData() async {
     String url = ApiRoutes.baseURL + ApiRoutes.deviceData;
     SharedPreferences prefs = await SharedPreferences.getInstance();
