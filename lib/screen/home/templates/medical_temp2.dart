@@ -374,10 +374,10 @@ class MedicalTemp2 extends StatelessWidget {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.transparent, // Transparent background
-              shadowColor: Colors.transparent, // No shadow
-              surfaceTintColor: Colors.transparent, // For Material 3 if needed
-              padding: EdgeInsets.zero, // Remove default padding if needed
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              surfaceTintColor: Colors.transparent,
+              padding: EdgeInsets.zero,
             ),
             child: const SizedBox(),
             onPressed: () async {

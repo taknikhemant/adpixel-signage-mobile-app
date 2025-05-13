@@ -6,6 +6,9 @@ import 'controller/home_controller.dart';
 import 'models/device_templete_data_model.dart';
 import 'templates/medical_temp2.dart';
 
+// "ed1f51de-2d13-4bf7-bb9d-3c42ef93f0f0" for opd or hospital
+// "c9247836-2243-4f40-acfb-be5d2dc15a9d" for retail
+
 class HomeScreen extends StatelessWidget {
   HomeScreen({super.key});
   final homeController = Get.put(HomeController());
