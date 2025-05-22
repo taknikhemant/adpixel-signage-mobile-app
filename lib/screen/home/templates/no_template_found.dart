@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-class NoTempleteFound extends StatelessWidget {
-  const NoTempleteFound({super.key});
+class NoTemplateFound extends StatelessWidget {
+  const NoTemplateFound({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +14,7 @@ class NoTempleteFound extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "No templete found contact tech team",
+              "No template found contact tech team",
               textAlign: TextAlign.center,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 50.sp),
             )

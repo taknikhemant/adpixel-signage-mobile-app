@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:get/get.dart';
@@ -7,6 +8,7 @@ import 'package:get/get.dart';
 import '../screen/home/models/device_templete_data_model.dart';
 import '../screen/login/screens/login_screen.dart';
 import '../utils/constants/api_routes.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 
 class SocketService extends GetxService {
   late IO.Socket socket;
@@ -14,8 +16,6 @@ class SocketService extends GetxService {
   RxString type = ''.obs;
   RxBool isSocketConnected = false.obs;
   RxList<Map<String, dynamic>> data = <Map<String, dynamic>>[].obs;
-
-  // final String deviceId = "7fa24bd5-3060-42bc-9555-a147a2ea0da5"; // Replace with actual device ID
 
   @override
   void onInit() {
@@ -46,6 +46,11 @@ class SocketService extends GetxService {
         "device_id": deviceId,
         "socket_id": socketId,
       });
+      Fluttertoast.showToast(
+        msg: "Socket connected.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+      );
     });
 
     socket.on('device_update', (response) {
@@ -54,6 +59,13 @@ class SocketService extends GetxService {
     });
 
     socket.on('auth_error', (response) async {
+      Fluttertoast.showToast(
+        msg: "Connected to Socket.IO Server auth_error",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+      );
+      FirebaseCrashlytics.instance
+          .log('Received type:- Connected to Socket.IO Server auth_error');
       log('Connected to Socket.IO Server auth_error', name: "server on");
       await prefs.clear();
       Get.offAll(() => LoginScreen());
@@ -61,6 +73,11 @@ class SocketService extends GetxService {
 
     socket.onDisconnect((_) {
       isSocketConnected.value = false;
+      Fluttertoast.showToast(
+        msg: "Socket not connected. Please check your internet connection.",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+      );
       log('Socket Disconnected', name: "server disconnect");
     });
   }
@@ -79,7 +96,7 @@ class SocketService extends GetxService {
 
       switch (jsonResponse['type']) {
         case "opd_status":
-          d!.value!.data!.device!.opdStatus = dataList[0]["value"];
+          d!.value!.data!.informations!.opdStatus = dataList[0]["value"];
           d.refresh();
           break;
 
@@ -113,8 +130,10 @@ class SocketService extends GetxService {
       log('Message: ${message.value}', name: "_handleResponse msg");
       log('Type: ${type.value}', name: "_handleResponse Type");
       log('Data: $data', name: "_handleResponse Data");
-    } catch (e) {
+    } catch (e, stackTrace) {
       log('Error parsing response: $e', name: "_handleResponse catch");
+      FirebaseCrashlytics.instance
+          .recordError(e, stackTrace, reason: 'Socket response parsing error');
     }
   }
 
@@ -144,6 +163,17 @@ class SocketService extends GetxService {
   void sendMessage(String event, Map<String, dynamic> data) {
     socket.emit(event, data);
     log('Sent message: $event -> $data', name: "sendMessage");
+  }
+
+  void closeSocket() {
+    if (socket.connected) {
+      socket.disconnect();
+      socket.dispose();
+      isSocketConnected.value = false;
+      log('Socket manually disconnected', name: "closeSocket");
+    } else {
+      log('Socket already disconnected', name: "closeSocket");
+    }
   }
 
   @override

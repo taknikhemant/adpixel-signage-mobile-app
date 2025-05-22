@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
-class NoIniternetScreen extends StatelessWidget {
-  const NoIniternetScreen({super.key});
+class NoInternetScreen extends StatelessWidget {
+  const NoInternetScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

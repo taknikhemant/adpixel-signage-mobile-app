@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:signage_pixel/screen/home/widget/carousel_slider_widget.dart';
 import 'package:signage_pixel/utils/extensions/hex_color_extension.dart';
 
 import '../../../services/socket_service.dart';
 import '../controller/home_controller.dart';
 import '../models/device_templete_data_model.dart';
+import '../widget/carousel_slider_download_widget.dart';
 import '../widget/medical_temp2_widgets.dart';
 
 class MedicalTemp2 extends StatelessWidget {
@@ -349,24 +349,26 @@ class MedicalTemp2 extends StatelessWidget {
               ),
               Expanded(
                 flex: 1,
-                child: tempData!.value!.data!.device!.opdStatus == "1"
+                child: tempData!.value!.data!.informations!.opdStatus == "1"
                     ? patientQueue()
-                    : tempData!.value!.data!.device!.opdStatus == "2"
+                    : tempData!.value!.data!.informations!.opdStatus == "2"
                         ? opdStartSoon()
-                        : tempData!.value!.data!.device!.opdStatus == "3"
+                        : tempData!.value!.data!.informations!.opdStatus == "3"
                             ? onWardRound()
-                            : tempData!.value!.data!.device!.opdStatus == "4"
+                            : tempData!.value!.data!.informations!.opdStatus ==
+                                    "4"
                                 ? onLeave()
-                                : tempData!.value!.data!.device!.opdStatus ==
+                                : tempData!.value!.data!.informations!
+                                            .opdStatus ==
                                         "5"
                                     ? opdOffLine()
-                                    : tempData!.value!.data!.device!
+                                    : tempData!.value!.data!.informations!
                                                 .opdStatus ==
                                             "6"
                                         ? opdONLine()
                                         : opdOffLine(),
               ),
-              CarouselSliderWidget(
+              CarouselSliderDownloadWidget(
                 expandeFlex: 4,
                 mediaItems: tempData!.value!.data!.carousal,
               ),
