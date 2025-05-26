@@ -11,12 +11,12 @@ import '../models/device_templete_data_model.dart';
 class CarouselSliderDownloadWidget extends StatefulWidget {
   final int? expandeFlex;
   final bool? autoScrollSingleFile;
-  final List<Carousal>? mediaItems;
+  // final List<Carousal>? mediaItems;
 
   const CarouselSliderDownloadWidget({
     this.expandeFlex = 4,
     this.autoScrollSingleFile = true,
-    required this.mediaItems,
+    // required this.mediaItems,
     super.key,
   });
 
@@ -30,45 +30,76 @@ class _CarouselSliderDownloadWidgetState
   final homeController = Get.find<HomeController>();
   CarouselSliderController? carouselController = CarouselSliderController();
 
-  // final downloader = FileDownloader();
-
   @override
   void initState() {
     super.initState();
-    log("message=>${widget.mediaItems!.map((e) => "file:${e.file}, fileType:${e.fileType}").toList()}",
-        name: "CarouselSliderDownloadWidget");
+
+    log(
+      "Carousel items => ${homeController.templateData.value!.data!.carousal!.map((e) => "file:${e.file}, fileType:${e.fileType}").toList()}",
+      name: "CarouselSliderDownloadWidget",
+    );
+    // Listen to message changes
+
+    onInitFilesUpdateFxn(); // First call on widget init
+    homeController.socketService.carousalList.listen((carousals) async {
+      if (carousals != null) {
+        await onInitFilesUpdateFxn();
+        log("Carousal updated: ${carousals.length} items",
+            name: "from CarousalList.listen");
+        // Perform any UI or data update here
+      }
+    });
+  }
+
+  onInitFilesUpdateFxn() async {
+    log("message", name: "onInitFilesUpdateFxn");
     Future.delayed(Duration.zero, () async {
-      List<Carousal> savedFils =
+      homeController.isDownloading.value = true;
+      homeController.isDownloading.refresh();
+      final allSavedFiles =
           await homeController.downloader.loadFromSharedPrefs();
-      List<Carousal> mediaItems = widget.mediaItems!;
+      final mediaItems = homeController.templateData.value!.data!.carousal;
 
-      // Find and download items not in savedFils
-      for (var item in mediaItems) {
-        bool isSaved = savedFils.any((saved) => saved.file == item.file);
-        if (!isSaved) {
-          await homeController.downloader.downloadFile(item);
-          log("message=>${item.localFile}", name: "download items");
-        }
+      // Files to download
+      final filesToDownload = mediaItems!.where(
+          (item) => !allSavedFiles.any((saved) => saved.file == item.file));
+
+      for (final item in filesToDownload) {
+        await homeController.downloader.downloadFile(
+          item,
+          category: 'carousel', // <-- set category for future use
+        );
+        log("Downloaded: ${item.file}", name: "CarouselDownload");
       }
 
-      // Remove saved files that are not in mediaItems or not from the network
-      for (var saved in savedFils) {
-        bool existsInMedia = mediaItems.any((item) => item.file == saved.file);
-        bool isNetworkFile = saved.file!.startsWith('http');
-        if (!existsInMedia || !isNetworkFile) {
-          await homeController.downloader.removeFile(saved);
-          log("message=>${saved.localFile}", name: "Remove saved files");
-        }
+      // Files to remove: not in current media items AND is a carousel file
+      final filesToRemove = allSavedFiles.where((saved) {
+        final notInMedia = !mediaItems.any((item) => item.file == saved.file);
+        final isNetworkFile = saved.file?.startsWith('http') ?? false;
+        final isCarousel = saved.category == 'carousel'; // check category
+
+        return notInMedia && isNetworkFile && isCarousel;
+      });
+
+      for (final saved in filesToRemove) {
+        await homeController.downloader.removeFile(saved);
+        log("Removed: ${saved.localFile}", name: "CarouselCleanup");
       }
-      // Re-fetch updated local file list AFTER all downloads/removals
+
+      // Final update to controller
       final updatedSaved =
           await homeController.downloader.loadFromSharedPrefs();
 
-      homeController.mediaItems.value = updatedSaved;
-      homeController.mediaItems.refresh();
+      homeController.mediaItems.value =
+          updatedSaved.where((item) => item.category == 'carousel').toList();
       homeController.isDownloading.value = false;
-      log("message=>$updatedSaved", name: "init saved files");
+      homeController.mediaItems.refresh();
+      log("Updated ${updatedSaved.length} carousel ==>${updatedSaved.map((e) => "{sequence:${e.sequence},localFile:${e.localFile}category:${e.category},file:${e.file}}").toList()}",
+          name: "CarouselSyncDone");
     });
+    // if (mounted) {
+    //   setState(() {});
+    // }
   }
 
   void _onVideoStart() {
@@ -89,7 +120,7 @@ class _CarouselSliderDownloadWidgetState
       // Disable autoPlay when a template video is playing
       final shouldAutoPlay = !homeController.isTemplateVideoPlaying.value &&
           (widget.autoScrollSingleFile == true ||
-              widget.mediaItems!.length > 1);
+              homeController.templateData.value!.data!.carousal!.length > 1);
 
       return Expanded(
         flex: widget.expandeFlex ?? 0,
@@ -102,13 +133,17 @@ class _CarouselSliderDownloadWidgetState
               )
             : homeController.mediaItems.value == null ||
                     homeController.mediaItems.value!.isEmpty
-                ? Center(
-                    child: Text(
-                      "No Data found",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 50.sp),
-                    ),
+                ? Image.asset(
+                    "assets/signage_pixel_default_banner.jpg",
+                    fit: BoxFit.fill,
                   )
+                // ? Center(
+                //     child: Text(
+                //       "No Data found",
+                //       style: TextStyle(
+                //           fontWeight: FontWeight.bold, fontSize: 50.sp),
+                //     ),
+                //   )
                 : Obx(() {
                     return CarouselSlider.builder(
                       carouselController: carouselController,

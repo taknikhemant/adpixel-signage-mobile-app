@@ -15,12 +15,12 @@ class RetailerTemplate extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          Column(
+          const Column(
             children: [
               CarouselSliderDownloadWidget(
                 expandeFlex: 1,
                 autoScrollSingleFile: false,
-                mediaItems: tempData!.value!.data!.carousal,
+                // mediaItems: tempData!.value!.data!.carousal,
               ),
             ],
           ),

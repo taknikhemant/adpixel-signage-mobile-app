@@ -23,6 +23,7 @@ class HomeController extends GetxController {
   void onInit() async {
     socketService.initSocket(d: templateData);
     super.onInit();
+
     log("${socketService.isSocketConnected.value}", name: "isSocketConnected");
   }
 
@@ -30,6 +31,26 @@ class HomeController extends GetxController {
     var data = await ApiServices.instance.deviceTempData();
     templateData.value = data;
     return data;
+  }
+
+  Future<Carousal?> getSavedImg(String img, {String cat = 'background'}) async {
+    final saved = await downloader.loadFromSharedPrefs();
+    // return saved.firstWhereOrNull((item) => item.category == img);
+    return saved.firstWhere(
+      (item) => item.file == img && item.category == 'background',
+      orElse: () => Carousal(), // ← same fix here
+    );
+  }
+
+  Future setSavedImg(String img, {String category = "background"}) async {
+    return await downloader.downloadFile(
+      Carousal(
+        sequence: "$category-1",
+        file: img,
+        fileType: "image",
+      ),
+      category: category,
+    );
   }
 
   Future logOut() async {

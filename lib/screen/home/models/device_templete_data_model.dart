@@ -422,14 +422,17 @@ class Carousal {
   String? fileType;
   String? file;
   String? localFile;
+  String? category;
 
-  Carousal({this.sequence, this.fileType, this.file, this.localFile});
+  Carousal(
+      {this.sequence, this.fileType, this.file, this.localFile, this.category});
 
   Carousal.fromJson(Map<String, dynamic> json) {
     sequence = _getString(json, 'sequence');
     fileType = _getString(json, 'file_type');
     file = _getString(json, 'file');
     localFile = _getString(json, 'local_file');
+    category = _getString(json, 'category');
   }
 
   Map<String, dynamic> toJson() => {
@@ -437,6 +440,7 @@ class Carousal {
         'file_type': fileType,
         'file': file,
         'local_file': localFile,
+        'category': category,
       };
 }
 

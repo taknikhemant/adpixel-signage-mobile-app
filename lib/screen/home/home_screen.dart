@@ -37,17 +37,22 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Obx(() {
-      return Scaffold(
-        body: homeController.socketService.isSocketConnected.value
-            ? homeFunction()
-            : homeFunction(),
-      );
-    });
+    return Scaffold(
+        body: Obx(
+            () => homeFunction(homeController.socketService.refreshKey.value))
+        // body: homeFunction(),
+        // body: Obx(() {
+        //   // if (!homeController.socketService.isSocketConnected.value) {
+        //   //   return const Center(child: CircularProgressIndicator());
+        //   // }
+        //   return homeFunction();
+        // }),
+        );
   }
 
-  Widget homeFunction() {
+  Widget homeFunction(int refreshKey) {
     return FutureBuilder(
+      key: ValueKey(refreshKey), // Important: forces FutureBuilder to refresh
       future: homeController.deviceTempData(),
       builder: (context, AsyncSnapshot<DeviceTempleteDataModel?> snap) {
         if (snap.connectionState == ConnectionState.waiting) {

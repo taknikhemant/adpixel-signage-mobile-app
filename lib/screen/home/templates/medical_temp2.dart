@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -10,11 +13,74 @@ import '../models/device_templete_data_model.dart';
 import '../widget/carousel_slider_download_widget.dart';
 import '../widget/medical_temp2_widgets.dart';
 
-class MedicalTemp2 extends StatelessWidget {
+class MedicalTemp2 extends StatefulWidget {
   final Rxn<DeviceTempleteDataModel>? tempData;
+
+  const MedicalTemp2({super.key, required this.tempData});
+
+  @override
+  State<MedicalTemp2> createState() => _MedicalTemp2State();
+}
+
+class _MedicalTemp2State extends State<MedicalTemp2> {
   final SocketService socketService = Get.find();
-  MedicalTemp2({super.key, required this.tempData});
+
   final homeController = Get.find<HomeController>();
+
+  String localBgPath = "";
+  bool isBgDownloading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.delayed(Duration.zero, () async {
+      final bgUrl = widget.tempData!.value!.data!.informations!.docAvtar;
+      if (mounted) {
+        setState(() {
+          isBgDownloading = true;
+        });
+      }
+      if (bgUrl != null && bgUrl.isNotEmpty) {
+        final savedFiles =
+            await homeController.downloader.loadFromSharedPrefs();
+
+        // Check if already saved background file exists
+        final existing = savedFiles.firstWhere(
+          (e) => e.file == bgUrl && e.category == 'background',
+          orElse: () =>
+              Carousal(), // ← Fix: must return a valid Carousal object
+        );
+
+        final isAlreadySaved =
+            existing.file == bgUrl && existing.localFile != null;
+        log("isAlreadySaved:$isAlreadySaved", name: "medical temp");
+        // Delete any old background files not matching the current one
+        for (final item in savedFiles) {
+          if (item.category == 'background' && item.file != bgUrl) {
+            await homeController.downloader.removeFile(item);
+          }
+        }
+
+        if (!isAlreadySaved) {
+          await homeController.setSavedImg(bgUrl);
+        }
+
+        // Load updated list to get new path
+        final bgItem = await homeController.getSavedImg(bgUrl);
+        log("bgItem:$bgItem", name: "medical temp");
+
+        if (mounted && bgItem!.localFile != null) {
+          setState(() {
+            isBgDownloading = false;
+            localBgPath = bgItem.localFile!;
+          });
+        }
+        log("$localBgPath", name: "medical temp");
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Obx(() {
@@ -25,11 +91,13 @@ class MedicalTemp2 extends StatelessWidget {
               Expanded(
                 flex: 3,
                 child: Container(
-                  color: tempData!.value!.data!.device!.deviceAppearance != null
-                      ? tempData!.value!.data!.device!.deviceAppearance!
-                          .primaryBgColor!
-                          .toColor()
-                      : const Color(0xffE8E4FF),
+                  color:
+                      widget.tempData!.value!.data!.device!.deviceAppearance !=
+                              null
+                          ? widget.tempData!.value!.data!.device!
+                              .deviceAppearance!.primaryBgColor!
+                              .toColor()
+                          : const Color(0xffE8E4FF),
                   child: Row(
                     children: [
                       Expanded(
@@ -40,12 +108,12 @@ class MedicalTemp2 extends StatelessWidget {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Text(
-                                "${tempData!.value!.data!.informations!.docName}",
+                                "${widget.tempData!.value!.data!.informations!.docName}",
                                 style: TextStyle(
-                                  color: tempData!.value!.data!.device!
+                                  color: widget.tempData!.value!.data!.device!
                                               .deviceAppearance !=
                                           null
-                                      ? tempData!.value!.data!.device!
+                                      ? widget.tempData!.value!.data!.device!
                                           .deviceAppearance!.textColor!
                                           .toColor()
                                       : Colors.black,
@@ -60,10 +128,10 @@ class MedicalTemp2 extends StatelessWidget {
                                 margin: EdgeInsets.symmetric(horizontal: 30.w),
                                 width: Get.width,
                                 decoration: ShapeDecoration(
-                                  color: tempData!.value!.data!.device!
+                                  color: widget.tempData!.value!.data!.device!
                                               .deviceAppearance !=
                                           null
-                                      ? tempData!.value!.data!.device!
+                                      ? widget.tempData!.value!.data!.device!
                                           .deviceAppearance!.secondaryBgColor!
                                           .toColor()
                                       : const Color(0xFFD8D3F5),
@@ -80,13 +148,13 @@ class MedicalTemp2 extends StatelessWidget {
                                   ],
                                 ),
                                 child: Text(
-                                  '${tempData!.value!.data!.informations!.docSpecialist}',
+                                  '${widget.tempData!.value!.data!.informations!.docSpecialist}',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: tempData!.value!.data!.device!
+                                    color: widget.tempData!.value!.data!.device!
                                                 .deviceAppearance !=
                                             null
-                                        ? tempData!.value!.data!.device!
+                                        ? widget.tempData!.value!.data!.device!
                                             .deviceAppearance!.textColor!
                                             .toColor()
                                         : Colors.black,
@@ -108,8 +176,8 @@ class MedicalTemp2 extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      ...tempData!.value!.data!.informations!
-                                          .docOtherSpecialization!
+                                      ...widget.tempData!.value!.data!
+                                          .informations!.docOtherSpecialization!
                                           .split(";")
                                           .map(
                                             (e) => Row(
@@ -128,13 +196,15 @@ class MedicalTemp2 extends StatelessWidget {
                                                   child: Text(
                                                     " ${e.trim()}",
                                                     style: TextStyle(
-                                                      color: tempData!
+                                                      color: widget
+                                                                  .tempData!
                                                                   .value!
                                                                   .data!
                                                                   .device!
                                                                   .deviceAppearance !=
                                                               null
-                                                          ? tempData!
+                                                          ? widget
+                                                              .tempData!
                                                               .value!
                                                               .data!
                                                               .device!
@@ -159,10 +229,10 @@ class MedicalTemp2 extends StatelessWidget {
                                 ),
                               ),
                               Divider(
-                                color: tempData!.value!.data!.device!
+                                color: widget.tempData!.value!.data!.device!
                                             .deviceAppearance !=
                                         null
-                                    ? tempData!.value!.data!.device!
+                                    ? widget.tempData!.value!.data!.device!
                                         .deviceAppearance!.iconColor!
                                         .toColor()
                                     : const Color(0xff3F2381),
@@ -176,11 +246,16 @@ class MedicalTemp2 extends StatelessWidget {
                                     Text(
                                       'OPD Details',
                                       style: TextStyle(
-                                        color: tempData!.value!.data!.device!
-                                                    .deviceAppearance !=
+                                        color: widget.tempData!.value!.data!
+                                                    .device!.deviceAppearance !=
                                                 null
-                                            ? tempData!.value!.data!.device!
-                                                .deviceAppearance!.textColor!
+                                            ? widget
+                                                .tempData!
+                                                .value!
+                                                .data!
+                                                .device!
+                                                .deviceAppearance!
+                                                .textColor!
                                                 .toColor()
                                             : Colors.black,
                                         fontSize: 34.sp,
@@ -195,11 +270,20 @@ class MedicalTemp2 extends StatelessWidget {
                                       children: [
                                         Icon(
                                           Icons.calendar_month_outlined,
-                                          color: tempData!.value!.data!.device!
+                                          color: widget
+                                                      .tempData!
+                                                      .value!
+                                                      .data!
+                                                      .device!
                                                       .deviceAppearance !=
                                                   null
-                                              ? tempData!.value!.data!.device!
-                                                  .deviceAppearance!.iconColor!
+                                              ? widget
+                                                  .tempData!
+                                                  .value!
+                                                  .data!
+                                                  .device!
+                                                  .deviceAppearance!
+                                                  .iconColor!
                                                   .toColor()
                                               : const Color(0xff3F2381),
                                           size: 50.r,
@@ -207,13 +291,15 @@ class MedicalTemp2 extends StatelessWidget {
                                         SizedBox(width: 15.w),
                                         Text(
                                           (() {
-                                            if (tempData
+                                            if (widget
+                                                    .tempData
                                                     ?.value!
                                                     .data
                                                     ?.informations
                                                     ?.docOpdDays !=
                                                 null) {
-                                              var opdDays = tempData!
+                                              var opdDays = widget
+                                                  .tempData!
                                                   .value!
                                                   .data!
                                                   .informations!
@@ -229,13 +315,15 @@ class MedicalTemp2 extends StatelessWidget {
                                             }
                                           })(),
                                           style: TextStyle(
-                                            color: tempData!
+                                            color: widget
+                                                        .tempData!
                                                         .value!
                                                         .data!
                                                         .device!
                                                         .deviceAppearance !=
                                                     null
-                                                ? tempData!
+                                                ? widget
+                                                    .tempData!
                                                     .value!
                                                     .data!
                                                     .device!
@@ -258,11 +346,20 @@ class MedicalTemp2 extends StatelessWidget {
                                       children: [
                                         Icon(
                                           Icons.watch_later_outlined,
-                                          color: tempData!.value!.data!.device!
+                                          color: widget
+                                                      .tempData!
+                                                      .value!
+                                                      .data!
+                                                      .device!
                                                       .deviceAppearance !=
                                                   null
-                                              ? tempData!.value!.data!.device!
-                                                  .deviceAppearance!.iconColor!
+                                              ? widget
+                                                  .tempData!
+                                                  .value!
+                                                  .data!
+                                                  .device!
+                                                  .deviceAppearance!
+                                                  .iconColor!
                                                   .toColor()
                                               : const Color(0xff3F2381),
                                           size: 50.r,
@@ -270,13 +367,15 @@ class MedicalTemp2 extends StatelessWidget {
                                         SizedBox(width: 15.w),
                                         Text(
                                           (() {
-                                            if (tempData
+                                            if (widget
+                                                    .tempData
                                                     ?.value!
                                                     .data
                                                     ?.informations
                                                     ?.docOpdTime !=
                                                 null) {
-                                              var opdTimes = tempData!
+                                              var opdTimes = widget
+                                                  .tempData!
                                                   .value!
                                                   .data!
                                                   .informations!
@@ -292,13 +391,15 @@ class MedicalTemp2 extends StatelessWidget {
                                             }
                                           })(),
                                           style: TextStyle(
-                                            color: tempData!
+                                            color: widget
+                                                        .tempData!
                                                         .value!
                                                         .data!
                                                         .device!
                                                         .deviceAppearance !=
                                                     null
-                                                ? tempData!
+                                                ? widget
+                                                    .tempData!
                                                     .value!
                                                     .data!
                                                     .device!
@@ -325,20 +426,30 @@ class MedicalTemp2 extends StatelessWidget {
                       Expanded(
                         flex: 4,
                         child: Container(
-                          // color: Colors.yellow,
                           decoration: BoxDecoration(
-                            color: tempData!.value!.data!.device!
+                            color: widget.tempData!.value!.data!.device!
                                         .deviceAppearance !=
                                     null
-                                ? tempData!.value!.data!.device!
+                                ? widget.tempData!.value!.data!.device!
                                     .deviceAppearance!.primaryBgColor!
                                     .toColor()
                                 : const Color(0xffE8E4FF),
-                            image: DecorationImage(
-                              image: NetworkImage(
-                                tempData!.value!.data!.informations!.docAvtar!,
+                            image: (isBgDownloading == true ||
+                                    localBgPath.isEmpty ||
+                                    !File(localBgPath).existsSync())
+                                ? null
+                                : DecorationImage(
+                                    image: FileImage(File(localBgPath)),
+                                    fit: BoxFit.fill,
+                                  ),
+                          ),
+                          child: Center(
+                            child: Text(
+                              isBgDownloading == true ? "Downloading.." : "",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 40.sp,
                               ),
-                              fit: BoxFit.fill,
                             ),
                           ),
                         ),
@@ -349,28 +460,33 @@ class MedicalTemp2 extends StatelessWidget {
               ),
               Expanded(
                 flex: 1,
-                child: tempData!.value!.data!.informations!.opdStatus == "1"
+                child: widget.tempData!.value!.data!.informations!.opdStatus ==
+                        "1"
                     ? patientQueue()
-                    : tempData!.value!.data!.informations!.opdStatus == "2"
+                    : widget.tempData!.value!.data!.informations!.opdStatus ==
+                            "2"
                         ? opdStartSoon()
-                        : tempData!.value!.data!.informations!.opdStatus == "3"
+                        : widget.tempData!.value!.data!.informations!
+                                    .opdStatus ==
+                                "3"
                             ? onWardRound()
-                            : tempData!.value!.data!.informations!.opdStatus ==
+                            : widget.tempData!.value!.data!.informations!
+                                        .opdStatus ==
                                     "4"
                                 ? onLeave()
-                                : tempData!.value!.data!.informations!
+                                : widget.tempData!.value!.data!.informations!
                                             .opdStatus ==
                                         "5"
                                     ? opdOffLine()
-                                    : tempData!.value!.data!.informations!
-                                                .opdStatus ==
+                                    : widget.tempData!.value!.data!
+                                                .informations!.opdStatus ==
                                             "6"
                                         ? opdONLine()
                                         : opdOffLine(),
               ),
-              CarouselSliderDownloadWidget(
+              const CarouselSliderDownloadWidget(
                 expandeFlex: 4,
-                mediaItems: tempData!.value!.data!.carousal,
+                // mediaItems: widget.tempData!.value!.data!.carousal,
               ),
             ],
           ),

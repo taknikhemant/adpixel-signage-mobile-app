@@ -16,6 +16,8 @@ class SocketService extends GetxService {
   RxString type = ''.obs;
   RxBool isSocketConnected = false.obs;
   RxList<Map<String, dynamic>> data = <Map<String, dynamic>>[].obs;
+  Rxn<List<Carousal>> carousalList = Rxn<List<Carousal>>();
+  var refreshKey = 0.obs;
 
   @override
   void onInit() {
@@ -40,6 +42,7 @@ class SocketService extends GetxService {
     socket.onConnect((_) {
       log('Connected to Socket.IO Server', name: "server onConnect");
       isSocketConnected.value = true;
+      onSocketConnectedOrReconnected();
       // Send the initial message after connecting
       String socketId = socket.id ?? "";
       sendMessage("broadcastMessage", {
@@ -82,6 +85,11 @@ class SocketService extends GetxService {
     });
   }
 
+// Assuming socketService uses a listener or status change event
+  void onSocketConnectedOrReconnected() {
+    refreshKey.value++; // triggers the UI to rebuild homeFunction
+  }
+
   void _handleResponse(dynamic response, Rxn<DeviceTempleteDataModel>? d) {
     try {
       Map<String, dynamic> jsonResponse = jsonDecode(jsonEncode(response));
@@ -110,8 +118,10 @@ class SocketService extends GetxService {
 
           if (carousalValue is List && carousalValue.isEmpty) {
             d!.value!.data!.carousal = [];
+            carousalList.value = [];
           } else if (carousalValue is String) {
             d!.value!.data!.carousal = stringTocaraousalList(carousalValue);
+            carousalList.value = stringTocaraousalList(carousalValue);
           } else {
             log('Unexpected data type for carousal_update: ${carousalValue.runtimeType}',
                 name: "_handleResponse catch");
@@ -142,17 +152,17 @@ class SocketService extends GetxService {
     List<String> urlList = urls.split(", ");
     for (int i = 0; i < urlList.length; i++) {
       images.add(Carousal(
-        sequence: (i + 1).toString(),
-        fileType: (urlList[i].split('.').last == "jpg" ||
-                urlList[i].split('.').last == "jpeg")
-            ? "image"
-            : urlList[i].split('.').last == "mp4"
-                ? "video"
-                : urlList[i].split('.').last == "gif"
-                    ? "gif"
-                    : urlList[i].split('.').last,
-        file: urlList[i],
-      ));
+          sequence: (i + 1).toString(),
+          fileType: (urlList[i].split('.').last == "jpg" ||
+                  urlList[i].split('.').last == "jpeg")
+              ? "image"
+              : urlList[i].split('.').last == "mp4"
+                  ? "video"
+                  : urlList[i].split('.').last == "gif"
+                      ? "gif"
+                      : urlList[i].split('.').last,
+          file: urlList[i],
+          category: "carousel"));
     }
 
     log("message=>${urls} ${images}", name: "handleResponse Data");
