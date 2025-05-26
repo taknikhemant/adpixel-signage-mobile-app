@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
         if (snap.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snap.hasError && snap.data == null) {
-          return const NoInternetScreen();
+          return NoInternetScreen();
         } else if (snap.data == null) {
           return Center(
             child: Text(

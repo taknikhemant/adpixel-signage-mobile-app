@@ -19,6 +19,8 @@ class SocketService extends GetxService {
   Rxn<List<Carousal>> carousalList = Rxn<List<Carousal>>();
   var refreshKey = 0.obs;
 
+  bool _isFirstConnect = true;
+
   @override
   void onInit() {
     super.onInit();
@@ -87,7 +89,12 @@ class SocketService extends GetxService {
 
 // Assuming socketService uses a listener or status change event
   void onSocketConnectedOrReconnected() {
-    refreshKey.value++; // triggers the UI to rebuild homeFunction
+    if (_isFirstConnect) {
+      _isFirstConnect = false;
+    } else {
+      refreshKey.value++; // Re-call API only on subsequent reconnects
+    }
+    // refreshKey.value++; // triggers the UI to rebuild homeFunction
   }
 
   void _handleResponse(dynamic response, Rxn<DeviceTempleteDataModel>? d) {

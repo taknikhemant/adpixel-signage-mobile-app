@@ -136,6 +136,7 @@ class _CarouselSliderDownloadWidgetState
                 ? Image.asset(
                     "assets/signage_pixel_default_banner.jpg",
                     fit: BoxFit.fill,
+                    width: Get.width,
                   )
                 // ? Center(
                 //     child: Text(
