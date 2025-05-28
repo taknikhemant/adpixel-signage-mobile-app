@@ -30,6 +30,8 @@ class _CarouselSliderDownloadWidgetState
   final homeController = Get.find<HomeController>();
   CarouselSliderController? carouselController = CarouselSliderController();
 
+  bool _isInitFilesUpdating = false;
+
   @override
   void initState() {
     super.initState();
@@ -51,33 +53,46 @@ class _CarouselSliderDownloadWidgetState
     });
   }
 
-  onInitFilesUpdateFxn() async {
-    log("message", name: "onInitFilesUpdateFxn");
-    Future.delayed(Duration.zero, () async {
+  Future<void> onInitFilesUpdateFxn() async {
+    if (_isInitFilesUpdating) {
+      log("Already running: onInitFilesUpdateFxn, skipping new call",
+          name: "CarouselGuard");
+      return;
+    }
+
+    _isInitFilesUpdating = true; // Set lock
+
+    try {
+      log("Started onInitFilesUpdateFxn", name: "CarouselSync");
+
       homeController.isDownloading.value = true;
       homeController.isDownloading.refresh();
+
       final allSavedFiles =
           await homeController.downloader.loadFromSharedPrefs();
       final mediaItems = homeController.templateData.value!.data!.carousal;
 
-      // Files to download
-      final filesToDownload = mediaItems!.where(
-          (item) => !allSavedFiles.any((saved) => saved.file == item.file));
+      if (mediaItems == null) {
+        log("mediaItems is null", name: "CarouselSync");
+        return;
+      }
+
+      final filesToDownload = mediaItems.where(
+        (item) => !allSavedFiles.any((saved) => saved.file == item.file),
+      );
 
       for (final item in filesToDownload) {
         await homeController.downloader.downloadFile(
           item,
-          category: 'carousel', // <-- set category for future use
+          category: 'carousel',
         );
         log("Downloaded: ${item.file}", name: "CarouselDownload");
       }
 
-      // Files to remove: not in current media items AND is a carousel file
       final filesToRemove = allSavedFiles.where((saved) {
         final notInMedia = !mediaItems.any((item) => item.file == saved.file);
         final isNetworkFile = saved.file?.startsWith('http') ?? false;
-        final isCarousel = saved.category == 'carousel'; // check category
-
+        final isCarousel = saved.category == 'carousel';
         return notInMedia && isNetworkFile && isCarousel;
       });
 
@@ -86,21 +101,73 @@ class _CarouselSliderDownloadWidgetState
         log("Removed: ${saved.localFile}", name: "CarouselCleanup");
       }
 
-      // Final update to controller
       final updatedSaved =
           await homeController.downloader.loadFromSharedPrefs();
 
       homeController.mediaItems.value =
           updatedSaved.where((item) => item.category == 'carousel').toList();
+
       homeController.isDownloading.value = false;
       homeController.mediaItems.refresh();
-      log("Updated ${updatedSaved.length} carousel ==>${updatedSaved.map((e) => "{sequence:${e.sequence},localFile:${e.localFile}category:${e.category},file:${e.file}}").toList()}",
-          name: "CarouselSyncDone");
-    });
-    // if (mounted) {
-    //   setState(() {});
-    // }
+
+      log("CarouselSyncDone: ${updatedSaved.map((e) => "{sequence:${e.sequence}, localFile:${e.localFile}, category:${e.category}, file:${e.file}}").toList()}");
+    } catch (e, stack) {
+      log("Error in onInitFilesUpdateFxn: $e\n$stack", name: "CarouselSync");
+    } finally {
+      _isInitFilesUpdating = false; // Release lock
+    }
   }
+
+  // onInitFilesUpdateFxn() async {
+  //   log("message", name: "onInitFilesUpdateFxn");
+  //   Future.delayed(Duration.zero, () async {
+  //     homeController.isDownloading.value = true;
+  //     homeController.isDownloading.refresh();
+  //     final allSavedFiles =
+  //         await homeController.downloader.loadFromSharedPrefs();
+  //     final mediaItems = homeController.templateData.value!.data!.carousal;
+
+  //     // Files to download
+  //     final filesToDownload = mediaItems!.where(
+  //         (item) => !allSavedFiles.any((saved) => saved.file == item.file));
+
+  //     for (final item in filesToDownload) {
+  //       await homeController.downloader.downloadFile(
+  //         item,
+  //         category: 'carousel', // <-- set category for future use
+  //       );
+  //       log("Downloaded: ${item.file}", name: "CarouselDownload");
+  //     }
+
+  //     // Files to remove: not in current media items AND is a carousel file
+  //     final filesToRemove = allSavedFiles.where((saved) {
+  //       final notInMedia = !mediaItems.any((item) => item.file == saved.file);
+  //       final isNetworkFile = saved.file?.startsWith('http') ?? false;
+  //       final isCarousel = saved.category == 'carousel'; // check category
+
+  //       return notInMedia && isNetworkFile && isCarousel;
+  //     });
+
+  //     for (final saved in filesToRemove) {
+  //       await homeController.downloader.removeFile(saved);
+  //       log("Removed: ${saved.localFile}", name: "CarouselCleanup");
+  //     }
+
+  //     // Final update to controller
+  //     final updatedSaved =
+  //         await homeController.downloader.loadFromSharedPrefs();
+
+  //     homeController.mediaItems.value =
+  //         updatedSaved.where((item) => item.category == 'carousel').toList();
+  //     homeController.isDownloading.value = false;
+  //     homeController.mediaItems.refresh();
+  //     log("Updated ${updatedSaved.length} carousel ==>${updatedSaved.map((e) => "{sequence:${e.sequence},localFile:${e.localFile}category:${e.category},file:${e.file}}").toList()}",
+  //         name: "CarouselSyncDone");
+  //   });
+  //   // if (mounted) {
+  //   //   setState(() {});
+  //   // }
+  // }
 
   void _onVideoStart() {
     homeController.isTemplateVideoPlaying.value = true;
