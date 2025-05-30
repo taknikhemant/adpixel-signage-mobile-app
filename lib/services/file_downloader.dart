@@ -14,40 +14,7 @@ class FileDownloader {
 
 // b41f8d
 // 44cb0d retail
-  // Future<void> downloadFile(Carousal item) async {
-  //   try {
-  //     final dio = Dio();
-
-  //     // Step 1: Prepare local file path
-  //     final dir = await getApplicationDocumentsDirectory();
-  //     final filename = '${item.sequence}_${item.file!.split('/').last}';
-  //     final filePath = '${dir.path}/$filename';
-
-  //     // Step 2: Download the file using Dio
-  //     await dio.download(
-  //       item.file!,
-  //       filePath,
-  //       onReceiveProgress: (received, total) {
-  //         if (total != -1) {
-  //           log("Downloading: ${(received / total * 100).toStringAsFixed(0)}%",
-  //               name: "downloadFileWithDio");
-  //         }
-  //       },
-  //     );
-
-  //     // Step 3: Update saved list with local path
-  //     List<Carousal> saved = await loadFromSharedPrefs();
-  //     saved.add(Carousal(
-  //       sequence: item.sequence,
-  //       file: item.file,
-  //       fileType: item.fileType,
-  //       localFile: filePath,
-  //     ));
-  //     await saveToSharedPrefs(saved);
-  //   } catch (e) {
-  //     log("Dio Download error: $e", name: "downloadFileWithDio");
-  //   }
-  // }
+// 5b976e  school
 
   Future<void> downloadFile(Carousal item, {String? category}) async {
     try {

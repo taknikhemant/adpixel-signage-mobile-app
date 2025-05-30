@@ -385,6 +385,7 @@ class Informations {
   String? docOpdDays;
   String? docOpdTime;
   String? opdStatus;
+  String? backGroundImage;
 
   Informations({
     this.docName,
@@ -394,6 +395,7 @@ class Informations {
     this.docOpdDays,
     this.docOpdTime,
     this.opdStatus,
+    this.backGroundImage,
   });
 
   Informations.fromJson(Map<String, dynamic> json) {
@@ -404,6 +406,7 @@ class Informations {
     docOpdDays = _getString(json, 'doc_opd_days');
     docOpdTime = _getString(json, 'doc_opd_time');
     opdStatus = _getString(json, 'opd_status');
+    backGroundImage = _getString(json, 'back_ground_image');
   }
 
   Map<String, dynamic> toJson() => {

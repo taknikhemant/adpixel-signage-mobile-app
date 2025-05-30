@@ -7,6 +7,7 @@ import 'controller/home_controller.dart';
 import 'models/device_templete_data_model.dart';
 import 'templates/medical_temp2.dart';
 import 'templates/retailer_template.dart';
+import 'templates/school_temp.dart';
 
 // "ed1f51de-2d13-4bf7-bb9d-3c42ef93f0f0" for opd or hospital
 // "c9247836-2243-4f40-acfb-be5d2dc15a9d" for retail
@@ -49,6 +50,8 @@ class HomeScreen extends StatelessWidget {
             return MedicalTemp2(tempData: homeController.templateData);
           } else if (templateId == "c9247836-2243-4f40-acfb-be5d2dc15a9d") {
             return RetailerTemplate(tempData: homeController.templateData);
+          } else if (templateId == "66e246dd-df30-4044-8ef0-a6c46d41b9b7") {
+            return SchoolTemp(tempData: homeController.templateData);
           } else {
             return NoTemplateFound();
           }
