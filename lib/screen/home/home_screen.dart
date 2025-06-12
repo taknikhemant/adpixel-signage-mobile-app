@@ -50,8 +50,12 @@ class HomeScreen extends StatelessWidget {
             return MedicalTemp2(tempData: homeController.templateData);
           } else if (templateId == "c9247836-2243-4f40-acfb-be5d2dc15a9d") {
             return RetailerTemplate(tempData: homeController.templateData);
-          } else if (templateId == "66e246dd-df30-4044-8ef0-a6c46d41b9b7") {
-            return SchoolTemp(tempData: homeController.templateData);
+          } else if (templateId == "66e246dd-df30-4044-8ef0-a6c46d41b9b7" ||
+              templateId == "f2f8deb3-f8f6-4d60-a08a-62a66efda861") {
+            return SchoolTemp(
+              tempData: homeController.templateData,
+              isTemp2: true,
+            );
           } else {
             return NoTemplateFound();
           }

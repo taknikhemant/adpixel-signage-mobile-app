@@ -11,7 +11,8 @@ import '../widget/carousel_slider_download_widget.dart';
 
 class SchoolTemp extends StatefulWidget {
   final Rxn<DeviceTempleteDataModel>? tempData;
-  const SchoolTemp({this.tempData, super.key});
+  final bool? isTemp2;
+  const SchoolTemp({this.tempData, this.isTemp2 = false, super.key});
 
   @override
   State<SchoolTemp> createState() => _SchoolTempState();
@@ -95,11 +96,12 @@ class _SchoolTempState extends State<SchoolTemp> {
             ),
             padding: EdgeInsets.only(
                 left: 100.w, right: 100.w, top: 400.h, bottom: 100.h),
-            child: const Column(
+            child: Column(
               children: [
                 CarouselSliderDownloadWidget(
                   expandeFlex: 1,
                   autoScrollSingleFile: false,
+                  showTextOnBottom: widget.isTemp2!,
                   // mediaItems: tempData!.value!.data!.carousal,
                 ),
               ],

@@ -11,11 +11,13 @@ import '../models/device_templete_data_model.dart';
 class CarouselSliderDownloadWidget extends StatefulWidget {
   final int? expandeFlex;
   final bool? autoScrollSingleFile;
+  final bool? showTextOnBottom;
   // final List<Carousal>? mediaItems;
 
   const CarouselSliderDownloadWidget({
     this.expandeFlex = 4,
     this.autoScrollSingleFile = true,
+    this.showTextOnBottom = false,
     // required this.mediaItems,
     super.key,
   });
@@ -118,57 +120,6 @@ class _CarouselSliderDownloadWidgetState
     }
   }
 
-  // onInitFilesUpdateFxn() async {
-  //   log("message", name: "onInitFilesUpdateFxn");
-  //   Future.delayed(Duration.zero, () async {
-  //     homeController.isDownloading.value = true;
-  //     homeController.isDownloading.refresh();
-  //     final allSavedFiles =
-  //         await homeController.downloader.loadFromSharedPrefs();
-  //     final mediaItems = homeController.templateData.value!.data!.carousal;
-
-  //     // Files to download
-  //     final filesToDownload = mediaItems!.where(
-  //         (item) => !allSavedFiles.any((saved) => saved.file == item.file));
-
-  //     for (final item in filesToDownload) {
-  //       await homeController.downloader.downloadFile(
-  //         item,
-  //         category: 'carousel', // <-- set category for future use
-  //       );
-  //       log("Downloaded: ${item.file}", name: "CarouselDownload");
-  //     }
-
-  //     // Files to remove: not in current media items AND is a carousel file
-  //     final filesToRemove = allSavedFiles.where((saved) {
-  //       final notInMedia = !mediaItems.any((item) => item.file == saved.file);
-  //       final isNetworkFile = saved.file?.startsWith('http') ?? false;
-  //       final isCarousel = saved.category == 'carousel'; // check category
-
-  //       return notInMedia && isNetworkFile && isCarousel;
-  //     });
-
-  //     for (final saved in filesToRemove) {
-  //       await homeController.downloader.removeFile(saved);
-  //       log("Removed: ${saved.localFile}", name: "CarouselCleanup");
-  //     }
-
-  //     // Final update to controller
-  //     final updatedSaved =
-  //         await homeController.downloader.loadFromSharedPrefs();
-
-  //     homeController.mediaItems.value =
-  //         updatedSaved.where((item) => item.category == 'carousel').toList();
-  //     homeController.isDownloading.value = false;
-  //     homeController.mediaItems.refresh();
-  //     log("Updated ${updatedSaved.length} carousel ==>${updatedSaved.map((e) => "{sequence:${e.sequence},localFile:${e.localFile}category:${e.category},file:${e.file}}").toList()}",
-  //         name: "CarouselSyncDone");
-  //   });
-  //   // if (mounted) {
-  //   //   setState(() {});
-  //   // }
-  // }
-
   void _onVideoStart() {
     homeController.isTemplateVideoPlaying.value = true;
   }
@@ -205,13 +156,6 @@ class _CarouselSliderDownloadWidgetState
                     fit: BoxFit.fill,
                     width: Get.width,
                   )
-                // ? Center(
-                //     child: Text(
-                //       "No Data found",
-                //       style: TextStyle(
-                //           fontWeight: FontWeight.bold, fontSize: 50.sp),
-                //     ),
-                //   )
                 : Obx(() {
                     return CarouselSlider.builder(
                       carouselController: carouselController,
@@ -219,10 +163,41 @@ class _CarouselSliderDownloadWidgetState
                       itemBuilder: (context, index, realIndex) {
                         final mediaItem =
                             homeController.mediaItems.value![index];
-                        return MediaWidget(
-                          mediaItem: mediaItem,
-                          onVideoStart: _onVideoStart,
-                          onVideoEnd: _onVideoEnd,
+                        return Column(
+                          children: [
+                            Expanded(
+                              child: MediaWidget(
+                                mediaItem: mediaItem,
+                                onVideoStart: _onVideoStart,
+                                onVideoEnd: _onVideoEnd,
+                              ),
+                            ),
+                            mediaItem.dynamicFieldsValue == null
+                                ? const SizedBox()
+                                : Visibility(
+                                    visible: widget.showTextOnBottom!,
+                                    child: Container(
+                                      width: Get.width,
+                                      color: Colors.white,
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.w, vertical: 14.h),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          ...mediaItem.dynamicFieldsValue!.map(
+                                            (e) => Text(
+                                              "${e.key} : ${e.value}",
+                                              style: TextStyle(
+                                                  fontSize: 50.sp,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                          ],
                         );
                       },
                       options: CarouselOptions(

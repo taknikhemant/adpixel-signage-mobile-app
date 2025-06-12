@@ -15,6 +15,7 @@ class FileDownloader {
 // b41f8d
 // 44cb0d retail
 // 5b976e  school
+// 59555d  school -2
 
   Future<void> downloadFile(Carousal item, {String? category}) async {
     try {
@@ -44,6 +45,7 @@ class FileDownloader {
         fileType: item.fileType,
         localFile: filePath,
         category: category,
+        dynamicFieldsValue: item.dynamicFieldsValue,
       ));
       await saveToSharedPrefs(saved);
     } catch (e) {
