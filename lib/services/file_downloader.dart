@@ -88,7 +88,7 @@ class FileDownloader {
     return prefs.clear();
   }
 
-  Future<void> clearAllDownloadedFiles() async {
+  Future<void> clearAllDownloadedFiles({bool clearSharedPref = true}) async {
     try {
       // Delete saved downloaded files
       List<Carousal> saved = await loadFromSharedPrefs();
@@ -101,7 +101,7 @@ class FileDownloader {
       }
 
       // Clear shared preferences
-      await clearAllSharePrefData();
+      clearSharedPref == true ? await clearAllSharePrefData() : null;
 
       // Delete all files in the temporary directory
       final tempDir = await getTemporaryDirectory();
@@ -120,7 +120,7 @@ class FileDownloader {
         });
       }
 
-      log("All downloaded files, temporary files, and shared preferences cleared.",
+      log("All downloaded files, temporary files, and shared preferences ($clearSharedPref) cleared.",
           name: "clearAllDownloadedFiles");
     } catch (e) {
       log("Error while clearing downloaded files: $e",

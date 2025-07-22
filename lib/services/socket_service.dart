@@ -17,6 +17,7 @@ class SocketService extends GetxService {
   RxBool isSocketConnected = false.obs;
   RxList<Map<String, dynamic>> data = <Map<String, dynamic>>[].obs;
   Rxn<List<Carousal>> carousalList = Rxn<List<Carousal>>();
+  Rxn<String> tempChange = Rxn<String>();
   var refreshKey = 0.obs;
 
   bool _isFirstConnect = true;
@@ -117,6 +118,7 @@ class SocketService extends GetxService {
 
         case "template_update":
           d!.value!.data!.device!.templateId = dataList[0]["value"];
+          tempChange.value = dataList[0]["value"];
           d.refresh();
           break;
 

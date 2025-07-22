@@ -23,6 +23,13 @@ class HomeController extends GetxController {
   void onInit() async {
     socketService.initSocket(d: templateData);
     super.onInit();
+    socketService.tempChange.listen((temp) async {
+      if (temp != null) {
+        log("temp updated: $temp", name: "from CarousalList.listen");
+        socketService.onSocketConnectedOrReconnected();
+        // Perform any UI or data update here
+      }
+    });
 
     log("${socketService.isSocketConnected.value}", name: "isSocketConnected");
   }
@@ -30,6 +37,7 @@ class HomeController extends GetxController {
   Future<DeviceTempleteDataModel?> deviceTempData() async {
     var data = await ApiServices.instance.deviceTempData();
     templateData.value = data;
+    log("deviceTempData ==> ${templateData.value}", name: "deviceTempData");
     return data;
   }
 

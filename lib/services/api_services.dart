@@ -5,6 +5,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:signage_pixel/services/file_downloader.dart';
 
 import '../screen/home/models/device_templete_data_model.dart';
 import '../screen/login/models/login_model.dart';
@@ -112,17 +113,28 @@ class ApiServices {
   //   }
   // }
 
-  Future<DeviceTempleteDataModel?> deviceTempData() async {
+  /// in this {int retryCount = 0} use for avoiding re-call api on 205 reponse
+  Future<DeviceTempleteDataModel?> deviceTempData({int retryCount = 0}) async {
     String url = ApiRoutes.baseURL + ApiRoutes.deviceData;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final jwttoken = prefs.getString('jwt');
     final deviceId = prefs.getString('deviceId');
     final templeteId = prefs.getString('templateId');
     String btoken = jwttoken ?? "";
+    if (deviceId == null || templeteId == null) {
+      log("deviceId or templateId is null!",
+          name: "ApiServices --> deviceTempData");
+
+      // Optional: show a dialog or logout
+      await prefs.clear();
+      Get.offAll(() => LoginScreen());
+
+      return null;
+    }
 
     Map<String, String> params = {
-      'device_id': deviceId!,
-      'template_id': templeteId!,
+      'device_id': deviceId,
+      'template_id': templeteId,
     };
 
     try {
@@ -140,7 +152,6 @@ class ApiServices {
       log(jsonEncode(params), name: "ApiServices--> deviceTempData");
       log("${response.statusCode}", name: "ApiServices--> deviceTempData");
       log(response.body.toString(), name: "ApiServices--> deviceTempData");
-
       final jsonData = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
@@ -156,11 +167,28 @@ class ApiServices {
               .log('Received type:- Connected to Socket.IO Server auth_error');
         }
         return null;
+      } else if (response.statusCode == 205) {
+        if (retryCount >= 2) {
+          // ⛔ Clear data and logout after 2 retries
+          final downloader = FileDownloader();
+          await downloader.clearAllDownloadedFiles();
+          Get.offAll(() => LoginScreen());
+          return null;
+        }
+        await prefs.remove("templateId");
+        await prefs.remove("cached_device_temp_data");
+        await prefs.setString("templateId",
+            "${jsonDecode(response.body)["current_template_id"]}");
+        // Get.offAll(() => LoginScreen());
+        final downloader = FileDownloader();
+        await downloader.clearAllDownloadedFiles(clearSharedPref: false);
+        return await deviceTempData(retryCount: retryCount + 1);
       } else {
         // Even on failure, try parsing response
         return DeviceTempleteDataModel.fromJson(jsonData);
       }
     } catch (e) {
+      e.printInfo();
       log(e.toString(), name: "ApiServices--> Exception");
 
       // 📴 Offline or network error, try cached data
