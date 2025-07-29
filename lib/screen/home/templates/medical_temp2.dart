@@ -82,8 +82,17 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
   }
 
   @override
+  void dispose() {
+    localBgPath = "";
+    isBgDownloading = false;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Obx(() {
+      log("message=> (${localBgPath.isEmpty} | ${isBgDownloading} | ${localBgPath.isEmpty}) {${(isBgDownloading == true || localBgPath.isEmpty || !File(localBgPath).existsSync())}} || ${File(localBgPath).existsSync()}",
+          name: "turdaa");
       return Stack(
         children: [
           Column(

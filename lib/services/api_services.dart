@@ -176,6 +176,7 @@ class ApiServices {
           return null;
         }
         await prefs.remove("templateId");
+        await prefs.remove("downloaded_media_files");
         await prefs.remove("cached_device_temp_data");
         await prefs.setString("templateId",
             "${jsonDecode(response.body)["current_template_id"]}");

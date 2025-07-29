@@ -120,6 +120,12 @@ class _CarouselSliderDownloadWidgetState
     }
   }
 
+  @override
+  void dispose() {
+    homeController.isTemplateVideoPlaying.value = false;
+    super.dispose();
+  }
+
   void _onVideoStart() {
     homeController.isTemplateVideoPlaying.value = true;
   }
@@ -139,7 +145,8 @@ class _CarouselSliderDownloadWidgetState
       final shouldAutoPlay = !homeController.isTemplateVideoPlaying.value &&
           (widget.autoScrollSingleFile == true ||
               homeController.templateData.value!.data!.carousal!.length > 1);
-
+      log("message =?> [${homeController.isTemplateVideoPlaying.value}] (${widget.autoScrollSingleFile}) {${homeController.templateData.value!.data!.carousal!.length}} $shouldAutoPlay",
+          name: "shouldAutoPlay carosuel");
       return Expanded(
         flex: widget.expandeFlex ?? 0,
         child: homeController.isDownloading.value

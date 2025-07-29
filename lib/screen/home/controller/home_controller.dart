@@ -35,6 +35,7 @@ class HomeController extends GetxController {
   }
 
   Future<DeviceTempleteDataModel?> deviceTempData() async {
+    templateData.value = null;
     var data = await ApiServices.instance.deviceTempData();
     templateData.value = data;
     log("deviceTempData ==> ${templateData.value}", name: "deviceTempData");
