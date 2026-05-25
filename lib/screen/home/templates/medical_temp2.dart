@@ -24,7 +24,6 @@ class MedicalTemp2 extends StatefulWidget {
 
 class _MedicalTemp2State extends State<MedicalTemp2> {
   final SocketService socketService = Get.find();
-
   final homeController = Get.find<HomeController>();
 
   String localBgPath = "";
@@ -35,27 +34,23 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
     super.initState();
 
     Future.delayed(Duration.zero, () async {
-      final bgUrl = widget.tempData!.value!.data!.informations!.docAvtar;
+      final bgUrl = widget.tempData?.value?.data?.informations?.docAvtar;
       if (mounted) {
         setState(() {
           isBgDownloading = true;
         });
       }
       if (bgUrl != null && bgUrl.isNotEmpty) {
-        final savedFiles =
-            await homeController.downloader.loadFromSharedPrefs();
+        final savedFiles = await homeController.downloader.loadFromSharedPrefs();
 
-        // Check if already saved background file exists
         final existing = savedFiles.firstWhere(
           (e) => e.file == bgUrl && e.category == 'background',
-          orElse: () =>
-              Carousal(), // ← Fix: must return a valid Carousal object
+          orElse: () => Carousal(),
         );
 
-        final isAlreadySaved =
-            existing.file == bgUrl && existing.localFile != null;
+        final isAlreadySaved = existing.file == bgUrl && existing.localFile != null;
         log("isAlreadySaved:$isAlreadySaved", name: "medical temp");
-        // Delete any old background files not matching the current one
+
         for (final item in savedFiles) {
           if (item.category == 'background' && item.file != bgUrl) {
             await homeController.downloader.removeFile(item);
@@ -66,14 +61,13 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
           await homeController.setSavedImg(bgUrl);
         }
 
-        // Load updated list to get new path
         final bgItem = await homeController.getSavedImg(bgUrl);
         log("bgItem:$bgItem", name: "medical temp");
 
-        if (mounted && bgItem!.localFile != null) {
+        if (mounted && bgItem?.localFile != null) {
           setState(() {
             isBgDownloading = false;
-            localBgPath = bgItem.localFile!;
+            localBgPath = bgItem!.localFile!;
           });
         }
         log("$localBgPath", name: "medical temp");
@@ -91,8 +85,21 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      log("message=> (${localBgPath.isEmpty} | ${isBgDownloading} | ${localBgPath.isEmpty}) {${(isBgDownloading == true || localBgPath.isEmpty || !File(localBgPath).existsSync())}} || ${File(localBgPath).existsSync()}",
-          name: "turdaa");
+      log("bg: (isEmpty:${localBgPath.isEmpty} | downloading:$isBgDownloading | exists:${localBgPath.isNotEmpty && File(localBgPath).existsSync()})",
+          name: "MedicalTemp2");
+
+      final appearance = widget.tempData?.value?.data?.device?.deviceAppearance;
+      final primaryColor = appearance?.primaryBgColor?.toColor() ?? const Color(0xffE8E4FF);
+      final secondaryColor = appearance?.secondaryBgColor?.toColor() ?? const Color(0xFFD8D3F5);
+      final fgTextColor = appearance?.textColor?.toColor() ?? Colors.black;
+      final fgIconColor = appearance?.iconColor?.toColor() ?? const Color(0xff3F2381);
+
+      final info = widget.tempData!.value!.data!.informations!;
+      final specializations = (info.docOtherSpecialization ?? '')
+          .split(';')
+          .where((e) => e.trim().isNotEmpty)
+          .toList();
+
       return Stack(
         children: [
           Column(
@@ -100,13 +107,7 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
               Expanded(
                 flex: 3,
                 child: Container(
-                  color:
-                      widget.tempData!.value!.data!.device!.deviceAppearance !=
-                              null
-                          ? widget.tempData!.value!.data!.device!
-                              .deviceAppearance!.primaryBgColor!
-                              .toColor()
-                          : const Color(0xffE8E4FF),
+                  color: primaryColor,
                   child: Row(
                     children: [
                       Expanded(
@@ -117,15 +118,9 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                             mainAxisSize: MainAxisSize.max,
                             children: [
                               Text(
-                                "${widget.tempData!.value!.data!.informations!.docName}",
+                                "${info.docName}",
                                 style: TextStyle(
-                                  color: widget.tempData!.value!.data!.device!
-                                              .deviceAppearance !=
-                                          null
-                                      ? widget.tempData!.value!.data!.device!
-                                          .deviceAppearance!.textColor!
-                                          .toColor()
-                                      : Colors.black,
+                                  color: fgTextColor,
                                   fontSize: 52.sp,
                                   fontFamily: 'Roboto Condensed',
                                   fontWeight: FontWeight.bold,
@@ -137,13 +132,7 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                                 margin: EdgeInsets.symmetric(horizontal: 30.w),
                                 width: Get.width,
                                 decoration: ShapeDecoration(
-                                  color: widget.tempData!.value!.data!.device!
-                                              .deviceAppearance !=
-                                          null
-                                      ? widget.tempData!.value!.data!.device!
-                                          .deviceAppearance!.secondaryBgColor!
-                                          .toColor()
-                                      : const Color(0xFFD8D3F5),
+                                  color: secondaryColor,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8.r),
                                   ),
@@ -157,16 +146,10 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                                   ],
                                 ),
                                 child: Text(
-                                  '${widget.tempData!.value!.data!.informations!.docSpecialist}',
+                                  '${info.docSpecialist}',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
-                                    color: widget.tempData!.value!.data!.device!
-                                                .deviceAppearance !=
-                                            null
-                                        ? widget.tempData!.value!.data!.device!
-                                            .deviceAppearance!.textColor!
-                                            .toColor()
-                                        : Colors.black,
+                                    color: fgTextColor,
                                     fontSize: 38.sp,
                                     fontFamily: 'Roboto Condensed',
                                     fontWeight: FontWeight.w600,
@@ -182,71 +165,39 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                                     left: 30.w,
                                   ),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      ...widget.tempData!.value!.data!
-                                          .informations!.docOtherSpecialization!
-                                          .split(";")
-                                          .map(
-                                            (e) => Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(top: 6.h),
-                                                  child: SvgPicture.asset(
-                                                    "assets/svg/noun-arrow.svg",
-                                                    height: 25.r,
-                                                  ),
-                                                ),
-                                                Flexible(
-                                                  child: Text(
-                                                    " ${e.trim()}",
-                                                    style: TextStyle(
-                                                      color: widget
-                                                                  .tempData!
-                                                                  .value!
-                                                                  .data!
-                                                                  .device!
-                                                                  .deviceAppearance !=
-                                                              null
-                                                          ? widget
-                                                              .tempData!
-                                                              .value!
-                                                              .data!
-                                                              .device!
-                                                              .deviceAppearance!
-                                                              .textColor!
-                                                              .toColor()
-                                                          : Colors.black,
-                                                      fontSize: 32.sp,
-                                                      fontFamily:
-                                                          'Roboto Condensed',
-                                                      fontWeight:
-                                                          FontWeight.w400,
-                                                      height: 0.995,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
+                                      ...specializations.map(
+                                        (e) => Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.only(top: 6.h),
+                                              child: SvgPicture.asset(
+                                                "assets/svg/noun-arrow.svg",
+                                                height: 25.r,
+                                              ),
                                             ),
-                                          ),
+                                            Flexible(
+                                              child: Text(
+                                                " ${e.trim()}",
+                                                style: TextStyle(
+                                                  color: fgTextColor,
+                                                  fontSize: 32.sp,
+                                                  fontFamily: 'Roboto Condensed',
+                                                  fontWeight: FontWeight.w400,
+                                                  height: 0.995,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ],
                                   ),
                                 ),
                               ),
-                              Divider(
-                                color: widget.tempData!.value!.data!.device!
-                                            .deviceAppearance !=
-                                        null
-                                    ? widget.tempData!.value!.data!.device!
-                                        .deviceAppearance!.iconColor!
-                                        .toColor()
-                                    : const Color(0xff3F2381),
-                                height: 1,
-                              ),
+                              Divider(color: fgIconColor, height: 1),
                               SizedBox(height: 8.h),
                               Container(
                                 margin: EdgeInsets.symmetric(horizontal: 30.w),
@@ -255,18 +206,7 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                                     Text(
                                       'OPD Details',
                                       style: TextStyle(
-                                        color: widget.tempData!.value!.data!
-                                                    .device!.deviceAppearance !=
-                                                null
-                                            ? widget
-                                                .tempData!
-                                                .value!
-                                                .data!
-                                                .device!
-                                                .deviceAppearance!
-                                                .textColor!
-                                                .toColor()
-                                            : Colors.black,
+                                        color: fgTextColor,
                                         fontSize: 34.sp,
                                         height: 0.9,
                                         fontFamily: 'Roboto Condensed',
@@ -274,72 +214,22 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                                       ),
                                     ),
                                     Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.calendar_month_outlined,
-                                          color: widget
-                                                      .tempData!
-                                                      .value!
-                                                      .data!
-                                                      .device!
-                                                      .deviceAppearance !=
-                                                  null
-                                              ? widget
-                                                  .tempData!
-                                                  .value!
-                                                  .data!
-                                                  .device!
-                                                  .deviceAppearance!
-                                                  .iconColor!
-                                                  .toColor()
-                                              : const Color(0xff3F2381),
+                                          color: fgIconColor,
                                           size: 50.r,
                                         ),
                                         SizedBox(width: 15.w),
                                         Text(
-                                          (() {
-                                            if (widget
-                                                    .tempData
-                                                    ?.value!
-                                                    .data
-                                                    ?.informations
-                                                    ?.docOpdDays !=
-                                                null) {
-                                              var opdDays = widget
-                                                  .tempData!
-                                                  .value!
-                                                  .data!
-                                                  .informations!
-                                                  .docOpdDays!
-                                                  .split(";")
+                                          info.docOpdDays
+                                                  ?.split(";")
                                                   .map((e) => e.trim())
-                                                  .toList();
-                                              return opdDays
-                                                  .map((time) => time)
-                                                  .join('\n');
-                                            } else {
-                                              return '';
-                                            }
-                                          })(),
+                                                  .join('\n') ??
+                                              '',
                                           style: TextStyle(
-                                            color: widget
-                                                        .tempData!
-                                                        .value!
-                                                        .data!
-                                                        .device!
-                                                        .deviceAppearance !=
-                                                    null
-                                                ? widget
-                                                    .tempData!
-                                                    .value!
-                                                    .data!
-                                                    .device!
-                                                    .deviceAppearance!
-                                                    .textColor!
-                                                    .toColor()
-                                                : Colors.black,
+                                            color: fgTextColor,
                                             fontSize: 30.sp,
                                             fontFamily: 'Roboto Condensed',
                                             fontWeight: FontWeight.w400,
@@ -350,72 +240,22 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                                     ),
                                     SizedBox(height: 10.h),
                                     Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.watch_later_outlined,
-                                          color: widget
-                                                      .tempData!
-                                                      .value!
-                                                      .data!
-                                                      .device!
-                                                      .deviceAppearance !=
-                                                  null
-                                              ? widget
-                                                  .tempData!
-                                                  .value!
-                                                  .data!
-                                                  .device!
-                                                  .deviceAppearance!
-                                                  .iconColor!
-                                                  .toColor()
-                                              : const Color(0xff3F2381),
+                                          color: fgIconColor,
                                           size: 50.r,
                                         ),
                                         SizedBox(width: 15.w),
                                         Text(
-                                          (() {
-                                            if (widget
-                                                    .tempData
-                                                    ?.value!
-                                                    .data
-                                                    ?.informations
-                                                    ?.docOpdTime !=
-                                                null) {
-                                              var opdTimes = widget
-                                                  .tempData!
-                                                  .value!
-                                                  .data!
-                                                  .informations!
-                                                  .docOpdTime!
-                                                  .split(";")
+                                          info.docOpdTime
+                                                  ?.split(";")
                                                   .map((e) => e.trim())
-                                                  .toList();
-                                              return opdTimes
-                                                  .map((time) => time)
-                                                  .join('\n');
-                                            } else {
-                                              return '';
-                                            }
-                                          })(),
+                                                  .join('\n') ??
+                                              '',
                                           style: TextStyle(
-                                            color: widget
-                                                        .tempData!
-                                                        .value!
-                                                        .data!
-                                                        .device!
-                                                        .deviceAppearance !=
-                                                    null
-                                                ? widget
-                                                    .tempData!
-                                                    .value!
-                                                    .data!
-                                                    .device!
-                                                    .deviceAppearance!
-                                                    .textColor!
-                                                    .toColor()
-                                                : Colors.black,
+                                            color: fgTextColor,
                                             fontSize: 30.sp,
                                             fontFamily: 'Roboto Condensed',
                                             fontWeight: FontWeight.w400,
@@ -436,14 +276,8 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                         flex: 4,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: widget.tempData!.value!.data!.device!
-                                        .deviceAppearance !=
-                                    null
-                                ? widget.tempData!.value!.data!.device!
-                                    .deviceAppearance!.primaryBgColor!
-                                    .toColor()
-                                : const Color(0xffE8E4FF),
-                            image: (isBgDownloading == true ||
+                            color: primaryColor,
+                            image: (isBgDownloading ||
                                     localBgPath.isEmpty ||
                                     !File(localBgPath).existsSync())
                                 ? null
@@ -454,7 +288,7 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
                           ),
                           child: Center(
                             child: Text(
-                              isBgDownloading == true ? "Downloading.." : "",
+                              isBgDownloading ? "Downloading.." : "",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 40.sp,
@@ -469,33 +303,22 @@ class _MedicalTemp2State extends State<MedicalTemp2> {
               ),
               Expanded(
                 flex: 1,
-                child: widget.tempData!.value!.data!.informations!.opdStatus ==
-                        "1"
+                child: info.opdStatus == "1"
                     ? patientQueue()
-                    : widget.tempData!.value!.data!.informations!.opdStatus ==
-                            "2"
+                    : info.opdStatus == "2"
                         ? opdStartSoon()
-                        : widget.tempData!.value!.data!.informations!
-                                    .opdStatus ==
-                                "3"
+                        : info.opdStatus == "3"
                             ? onWardRound()
-                            : widget.tempData!.value!.data!.informations!
-                                        .opdStatus ==
-                                    "4"
+                            : info.opdStatus == "4"
                                 ? onLeave()
-                                : widget.tempData!.value!.data!.informations!
-                                            .opdStatus ==
-                                        "5"
+                                : info.opdStatus == "5"
                                     ? opdOffLine()
-                                    : widget.tempData!.value!.data!
-                                                .informations!.opdStatus ==
-                                            "6"
+                                    : info.opdStatus == "6"
                                         ? opdONLine()
                                         : opdOffLine(),
               ),
               const CarouselSliderDownloadWidget(
                 expandeFlex: 4,
-                // mediaItems: widget.tempData!.value!.data!.carousal,
               ),
             ],
           ),

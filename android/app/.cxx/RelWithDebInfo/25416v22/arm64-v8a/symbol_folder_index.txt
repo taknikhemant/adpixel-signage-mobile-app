@@ -1,1 +1,0 @@
-/Users/sohitvyas/projects/flutter/freelance/taknikbharti/signage_pixel/build/app/intermediates/cxx/RelWithDebInfo/25416v22/obj/arm64-v8a

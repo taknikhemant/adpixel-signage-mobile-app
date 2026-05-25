@@ -66,7 +66,7 @@ class LoginController extends GetxController {
                   showLoginToast(isSuccess: true),
                   Get.offAll(() => HomeScreen()),
                 }
-              : showMessageToast(message: v!.message, isSuccess: true));
+              : showMessageToast(message: v!.message, isSuccess: false));
     }
   }
 

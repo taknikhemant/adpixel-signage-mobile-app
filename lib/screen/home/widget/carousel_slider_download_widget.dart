@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -31,6 +32,7 @@ class _CarouselSliderDownloadWidgetState
     extends State<CarouselSliderDownloadWidget> {
   final homeController = Get.find<HomeController>();
   CarouselSliderController? carouselController = CarouselSliderController();
+  StreamSubscription? _carousalSubscription;
 
   bool _isInitFilesUpdating = false;
 
@@ -38,19 +40,21 @@ class _CarouselSliderDownloadWidgetState
   void initState() {
     super.initState();
 
-    log(
-      "Carousel items => ${homeController.templateData.value!.data!.carousal!.map((e) => "file:${e.file}, fileType:${e.fileType}").toList()}",
-      name: "CarouselSliderDownloadWidget",
-    );
-    // Listen to message changes
+    final carousal = homeController.templateData.value?.data?.carousal;
+    if (carousal != null) {
+      log(
+        "Carousel items => ${carousal.map((e) => "file:${e.file}, fileType:${e.fileType}").toList()}",
+        name: "CarouselSliderDownloadWidget",
+      );
+    }
 
-    onInitFilesUpdateFxn(); // First call on widget init
-    homeController.socketService.carousalList.listen((carousals) async {
+    onInitFilesUpdateFxn();
+    _carousalSubscription =
+        homeController.socketService.carousalList.listen((carousals) async {
       if (carousals != null) {
         await onInitFilesUpdateFxn();
         log("Carousal updated: ${carousals.length} items",
             name: "from CarousalList.listen");
-        // Perform any UI or data update here
       }
     });
   }
@@ -122,6 +126,7 @@ class _CarouselSliderDownloadWidgetState
 
   @override
   void dispose() {
+    _carousalSubscription?.cancel();
     homeController.isTemplateVideoPlaying.value = false;
     super.dispose();
   }

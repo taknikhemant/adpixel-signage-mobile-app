@@ -112,17 +112,22 @@ class SocketService extends GetxService {
 
       switch (jsonResponse['type']) {
         case "opd_status":
-          d!.value!.data!.informations!.opdStatus = dataList[0]["value"];
-          d.refresh();
+          if (d?.value?.data?.informations != null && dataList.isNotEmpty) {
+            d!.value!.data!.informations!.opdStatus = dataList[0]["value"];
+            d.refresh();
+          }
           break;
 
         case "template_update":
-          d!.value!.data!.device!.templateId = dataList[0]["value"];
-          tempChange.value = dataList[0]["value"];
-          d.refresh();
+          if (d?.value?.data?.device != null && dataList.isNotEmpty) {
+            d!.value!.data!.device!.templateId = dataList[0]["value"];
+            tempChange.value = dataList[0]["value"];
+            d.refresh();
+          }
           break;
 
         case "carousal_update":
+          if (d?.value?.data == null || dataList.isEmpty) break;
           var carousalValue = dataList[0]["value"];
 
           if (carousalValue is List && carousalValue.isEmpty) {
@@ -140,7 +145,6 @@ class SocketService extends GetxService {
           break;
 
         default:
-          // No action needed for unknown types
           break;
       }
 
